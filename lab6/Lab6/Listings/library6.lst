@@ -1,0 +1,1065 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             lib, CODE, READWRITE
+    2 00000000                 EXPORT           read_character
+    3 00000000                 EXPORT           output_character
+    4 00000000                 EXPORT           output_string
+    5 00000000                 EXPORT           read_string
+    6 00000000                 EXPORT           pin_connect_block_setup_for_uar
+t0
+    7 00000000                 EXPORT           uart_init
+    8 00000000                 EXPORT           display_digit_on_7_seg
+    9 00000000                 EXPORT           setup
+   10 00000000                 EXPORT           clear_string
+   11 00000000         
+   12 00000000         
+   13 00000000         
+   14 00000000 00000014 
+                       U0LSR   EQU              0x14        ; UART0 Line Status
+                                                             Register
+   15 00000000 00000004 
+                       U0IER   EQU              0x4         ; UART0 Interrupt E
+                                                            nable Register
+   16 00000000 0000000C 
+                       U0LCR   EQU              0xC         ; UART0 Line Contro
+                                                            l Register
+   17 00000000 00000020 
+                       THRE    EQU              0x20
+   18 00000000 E0028018 
+                       IO1DIR  EQU              0xE0028018
+   19 00000000 E0028010 
+                       IO1PIN  EQU              0xE0028010
+   20 00000000 E002801C 
+                       IO1CLR  EQU              0xE002801C
+   21 00000000 E0028014 
+                       IO1SET  EQU              0xE0028014
+   22 00000000 E0028008 
+                       IO0DIR  EQU              0xE0028008
+   23 00000000 E0028000 
+                       IO0SET  EQU              0xE0028000
+   24 00000000 E002800C 
+                       IO0CLR  EQU              0xE002800C
+   25 00000000 E002C000 
+                       PINSEL0 EQU              0xE002C000
+   26 00000000         
+   27 00000000         ;Hexdecimal hard code
+   28 00000000 0000B7A0 
+                       Seg     EQU              0xB7A0
+   29 00000000 00008000 
+                       Hex_g   EQU              0x8000
+   30 00000000 00003780 
+                       Hex_0   EQU              0x3780
+   31 00000000 00000300 
+                       Hex_1   EQU              0x300
+   32 00000000 00009580 
+                       Hex_2   EQU              0x9580
+   33 00000000 00008780 
+                       Hex_3   EQU              0x8780
+   34 00000000 0000A300 
+                       Hex_4   EQU              0xA300
+   35 00000000 0000A680 
+                       Hex_5   EQU              0xA680
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   36 00000000 0000B680 
+                       Hex_6   EQU              0xB680
+   37 00000000 00000380 
+                       Hex_7   EQU              0x0380
+   38 00000000 0000B780 
+                       Hex_8   EQU              0xB780
+   39 00000000 0000A380 
+                       Hex_9   EQU              0xA380
+   40 00000000 0000B380 
+                       Hex_a   EQU              0xB380
+   41 00000000 0000B600 
+                       Hex_b   EQU              0xB600
+   42 00000000 00003480 
+                       Hex_c   EQU              0x3480
+   43 00000000 00009700 
+                       Hex_d   EQU              0x9700
+   44 00000000 0000B480 
+                       Hex_e   EQU              0xB480
+   45 00000000 0000B080 
+                       Hex_f   EQU              0xB080
+   46 00000000 0000B7A0 
+                       Hex_off EQU              0xB7A0
+   47 00000000         
+   48 00000000         
+   49 00000000         
+   50 00000000         
+   51 00000000 00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00       buffer  =                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\
+0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\
+0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",0
+   52 000000A9 49 6E 74 
+              65 72 72 
+              75 70 74 
+              00       prompt1 =                "Interrupt",0
+   53 000000B3         
+   54 000000B3 00              ALIGN
+   55 000000B4         
+   56 000000B4         
+   57 000000B4         
+   58 000000B4         ;///////////////////////////////////////////////////////
+                       /
+   59 000000B4         
+   60 000000B4         ;This routine takes in a buffer which we then clear by c
+                       hanging every non null character to a null 
+   61 000000B4         ;Terminates after the end of string is reach in other wo
+                       rds a null character is reached
+   62 000000B4         
+   63 000000B4         clear_string
+   64 000000B4 E92D4009        STMFD            sp!,{lr, r0, r3}
+   65 000000B8         
+   66 000000B8         clear
+   67 000000B8 E5D40000        LDRB             r0, [r4]
+   68 000000BC E3500000        CMP              r0, #0      ; comparing for nul
+                                                            l
+   69 000000C0 0A000003        BEQ              clear_exit
+   70 000000C4 E3A03000        LDR              r3, =0x0
+   71 000000C8 E5843000        STR              r3, [r4]
+   72 000000CC E2844001        ADD              r4, r4, #1
+   73 000000D0         
+   74 000000D0 EAFFFFF8        B                clear
+   75 000000D4         
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+   76 000000D4         clear_exit
+   77 000000D4 E8BD4009        LDMFD            sp!,{lr, r0, r3}
+   78 000000D8 E12FFF1E        BX               lr
+   79 000000DC         
+   80 000000DC         ;///////////////////////////////////////////////////////
+                       /
+   81 000000DC         display_digit_on_7_seg               ;input=r0
+   82 000000DC         
+   83 000000DC         ;Display subroutine works by writing a specific hexadeci
+                       mal to IO0SET.
+   84 000000DC         ;This hexadecmial specifies which segment to turn on.
+   85 000000DC         
+   86 000000DC E92D402C        STMFD            SP!,{r2,r3,r5,lr}
+   87 000000E0         
+   88 000000E0 E59F2208        LDR              r2, =IO0SET ;Set register
+   89 000000E4 E59F3208        LDR              r3, =IO0CLR ;Port 0 clear regis
+                                                            ter 
+   90 000000E8         
+   91 000000E8 E3570000        CMP              r7, #0      ; This blocks turns
+                                                             on the led if r7 i
+                                                            s negative, off whe
+                                                            n r7 is positive
+   92 000000EC E59F5204        LDR              r5, =Hex_off
+   93 000000F0 CA000032        BGT              off_seg
+   94 000000F4         
+   95 000000F4 E3500030        CMP              r0, #48
+   96 000000F8 E3A05DDE        LDR              r5, =Hex_0  ;7 seg displays 0 
+   97 000000FC 0A00002D        BEQ              display
+   98 00000100         
+   99 00000100 E3500031        CMP              r0, #49
+  100 00000104 E3A05C03        LDR              r5, =Hex_1  ;7 seg displays 1 
+  101 00000108 0A00002A        BEQ              display
+  102 0000010C         
+  103 0000010C E3500032        CMP              r0, #50
+  104 00000110 E59F51E4        LDR              r5, =Hex_2  ;7 seg displays 2 e
+                                                            tc...
+  105 00000114 0A000027        BEQ              display
+  106 00000118         
+  107 00000118 E3500033        CMP              r0, #51
+  108 0000011C E59F51DC        LDR              r5, =Hex_3
+  109 00000120 0A000024        BEQ              display
+  110 00000124         
+  111 00000124 E3500034        CMP              r0, #52
+  112 00000128 E3A05CA3        LDR              r5, =Hex_4
+  113 0000012C 0A000021        BEQ              display
+  114 00000130         
+  115 00000130 E3500035        CMP              r0, #53
+  116 00000134 E59F51C8        LDR              r5, =Hex_5
+  117 00000138 0A00001E        BEQ              display
+  118 0000013C         
+  119 0000013C E3500036        CMP              r0, #54
+  120 00000140 E59F51C0        LDR              r5, =Hex_6
+  121 00000144 0A00001B        BEQ              display
+  122 00000148         
+  123 00000148 E3500037        CMP              r0, #55
+  124 0000014C E3A05D0E        LDR              r5, =Hex_7
+  125 00000150 0A000018        BEQ              display
+  126 00000154         
+  127 00000154 E3500038        CMP              r0, #56
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+  128 00000158 E59F51AC        LDR              r5, =Hex_8
+  129 0000015C 0A000015        BEQ              display
+  130 00000160         
+  131 00000160 E3500039        CMP              r0, #57
+  132 00000164 E59F51A4        LDR              r5, =Hex_9
+  133 00000168 0A000012        BEQ              display
+  134 0000016C         
+  135 0000016C E3500041        CMP              r0, #65
+  136 00000170 E59F519C        LDR              r5, =Hex_a
+  137 00000174 0A00000F        BEQ              display
+  138 00000178         
+  139 00000178 E3500042        CMP              r0, #66
+  140 0000017C E3A05CB6        LDR              r5, =Hex_b
+  141 00000180 0A00000C        BEQ              display
+  142 00000184         
+  143 00000184 E3500043        CMP              r0, #67
+  144 00000188 E3A05DD2        LDR              r5, =Hex_c
+  145 0000018C 0A000009        BEQ              display
+  146 00000190         
+  147 00000190 E3500044        CMP              r0, #68
+  148 00000194 E3A05C97        LDR              r5, =Hex_d
+  149 00000198 0A000006        BEQ              display
+  150 0000019C         
+  151 0000019C E3500045        CMP              r0, #69
+  152 000001A0 E59F5170        LDR              r5, =Hex_e
+  153 000001A4 0A000003        BEQ              display
+  154 000001A8         
+  155 000001A8 E3500046        CMP              r0, #70
+  156 000001AC E59F5168        LDR              r5, =Hex_f
+  157 000001B0 0A000000        BEQ              display
+  158 000001B4         
+  159 000001B4         ;CMP r0, #71
+  160 000001B4         ;LDR r5, =Hex_g
+  161 000001B4         ;BEQ display
+  162 000001B4         
+  163 000001B4 EA000003        B                seg_exit
+  164 000001B8         
+  165 000001B8         
+  166 000001B8         display
+  167 000001B8 E5825000        STR              r5, [r2]    ; stores the hexade
+                                                            cimal to IO0SET reg
+                                                            ister
+  168 000001BC         
+  169 000001BC EA000001        B                seg_exit
+  170 000001C0         
+  171 000001C0         off_seg
+  172 000001C0 E5835000        STR              r5, [r3]
+  173 000001C4         
+  174 000001C4 0AFFFFFF        BEQ              seg_exit
+  175 000001C8         
+  176 000001C8         seg_exit
+  177 000001C8         
+  178 000001C8 E8BD402C        LDMFD            SP!,{r2,r3,r5,lr}
+  179 000001CC E12FFF1E        BX               lr
+  180 000001D0         
+  181 000001D0         
+  182 000001D0         ;///////////////////////////////////////////////////////
+                       // 
+  183 000001D0         
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+  184 000001D0         uart_init
+  185 000001D0 E92D4003        STMFD            SP!,{r0-r1,lr}
+  186 000001D4 E59F0144        LDR              r0, =0xE000C000 ;Base address 0
+                                                            xE000C000
+  187 000001D8         
+  188 000001D8 E3A01083        MOV              r1, #0x83   ;Loads the bit 1000
+                                                            0011 to the U0LCR
+  189 000001DC E5C0100C        STRB             r1, [r0, #U0LCR]
+  190 000001E0         
+  191 000001E0 E3A01078        MOV              r1, #0x78   ;Loads the bit 1111
+                                                            0000 to the Base ad
+                                                            dress
+  192 000001E4 E5C01000        STRB             r1, [r0]
+  193 000001E8         
+  194 000001E8 E3A01000        MOV              r1, #0x0    ;Loads the bit 0000
+                                                            0000 to the U0IER
+  195 000001EC E5C01004        STRB             r1, [r0, #U0IER]
+  196 000001F0         
+  197 000001F0 E3A01003        MOV              r1, #0x3    ;Loads the bit 0000
+                                                            0011 to the U0LCR
+  198 000001F4 E5C0100C        STRB             r1, [r0, #U0LCR]
+  199 000001F8         
+  200 000001F8 E8BD4003        LDMFD            sp!, {r0-r1,lr}
+  201 000001FC E12FFF1E        BX               lr
+  202 00000200         
+  203 00000200         ;///////////////////////////////////////////////////////
+                       //
+  204 00000200         
+  205 00000200         read_character
+  206 00000200 E92D400E        STMFD            sp!,{r1,r2,r3,lr}
+  207 00000204         
+  208 00000204         read_character_begin
+  209 00000204 E59F1118        LDR              r1, =0xE000C014
+  210 00000208 E59F3110        LDR              r3, =0xE000C000
+  211 0000020C         
+  212 0000020C E5D12000        LDRB             r2, [r1]    ;Pulls the bits out
+                                                             from the line stat
+                                                            us register to r2
+  213 00000210 E2022001        AND              r2, r2, #1  ;Compares r2 to a b
+                                                            it mask to isolate 
+                                                            the first bit
+  214 00000214 E3520000        CMP              r2, #0      ;When the first bit
+                                                             is 0 there is char
+                                                            acter in the reciev
+                                                            ing bufffer
+  215 00000218         
+  216 00000218 0AFFFFF9        BEQ              read_character_begin
+  217 0000021C         
+  218 0000021C E5D30000        LDRB             r0, [r3]    ;Read byte from rec
+                                                            eive register
+  219 00000220         
+  220 00000220 E8BD400E        LDMFD            sp!, {r1,r2,r3,lr}
+  221 00000224 E12FFF1E        BX               lr
+  222 00000228         
+  223 00000228         ;///////////////////////////////////////////////////////
+                       // 
+  224 00000228         
+  225 00000228         output_character
+  226 00000228 E92D400E        STMFD            sp!,{r1,r2,r3,lr}
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+  227 0000022C         
+  228 0000022C         output_character_begin
+  229 0000022C E59F10F0        LDR              r1, =0xE000C014
+  230 00000230 E59F30E8        LDR              r3, =0xE000C000
+  231 00000234         
+  232 00000234 E5D12000        LDRB             r2, [r1]
+  233 00000238 E2022020        AND              r2, r2, #THRE ; Isolates the TH
+                                                            RE bit of the statu
+                                                            s register and stor
+                                                            es result to r5
+  234 0000023C E3520020        CMP              r2, #THRE   ; Compares mask to 
+                                                            isolated THRE bit
+  235 00000240         
+  236 00000240 1AFFFFF9        BNE              output_character_begin ; If the
+                                                             isolated bit isn't
+                                                             equal to the mask 
+                                                            goes back to loop
+  237 00000244         
+  238 00000244 E5C30000        STRB             r0, [r3]    ; Stores character 
+                                                            to the transmit reg
+                                                            ister
+  239 00000248 E8BD400E        LDMFD            sp!, {r1,r2,r3,lr}
+  240 0000024C         
+  241 0000024C E12FFF1E        BX               lr
+  242 00000250         
+  243 00000250         ;///////////////////////////////////////////////////////
+                       //
+  244 00000250         
+  245 00000250         output_string
+  246 00000250 E92D4001        STMFD            SP!,{r0, lr}
+  247 00000254         output_string_begin
+  248 00000254 E5D10000        LDRB             r0, [r1]
+  249 00000258 E3500000        CMP              r0, #0      ; comparing for nul
+                                                            l
+  250 0000025C 0A000002        BEQ              output_string_exit ;If characte
+                                                            r is null branch to
+                                                             the exit of output
+                                                             string
+  251 00000260         
+  252 00000260 E2811001        ADD              r1, r1, #1  ;Increments index o
+                                                            f the string to be 
+                                                            printed
+  253 00000264 EBFFFFFE        BL               output_character
+  254 00000268 EAFFFFF9        B                output_string_begin ;branch to 
+                                                            the beginning 
+  255 0000026C         
+  256 0000026C         output_string_exit
+  257 0000026C E8BD4001        LDMFD            sp!, {r0, lr} ;load return addr
+                                                            ess of lr
+  258 00000270 E12FFF1E        BX               lr          ;branches back to m
+                                                            ain code
+  259 00000274         
+  260 00000274         ;///////////////////////////////////////////////////////
+                       //
+  261 00000274         
+  262 00000274         read_string
+  263 00000274 E92D4000        STMFD            SP!,{lr}
+  264 00000278         read_string_begin
+  265 00000278 EBFFFFFE        BL               read_character ;read inputed ch
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+                                                            aracter
+  266 0000027C E350000D        CMP              r0, #0xD    ; checking for ente
+                                                            r
+  267 00000280 0A000003        BEQ              read_string_exit
+  268 00000284         
+  269 00000284 E5810000        STR              r0, [r1]
+  270 00000288 E2811001        ADD              r1, r1, #1  ;Increments index o
+                                                            f the string buffer
+                                                            
+  271 0000028C EBFFFFFE        BL               output_character ;Echos read ch
+                                                            aracter
+  272 00000290 EAFFFFF8        B                read_string_begin ;branch to th
+                                                            e beginning 
+  273 00000294         
+  274 00000294         read_string_exit
+  275 00000294 E3A00000        MOV              r0, #0
+  276 00000298 E5810000        STR              r0, [r1]
+  277 0000029C         
+  278 0000029C E3A0000A        MOV              r0, #0xA    ; printing new line
+                                                            
+  279 000002A0 EBFFFFFE        BL               output_character
+  280 000002A4 E3A0000D        MOV              r0, #0xD    ; printing carriage
+                                                             return
+  281 000002A8 EBFFFFFE        BL               output_character
+  282 000002AC         
+  283 000002AC E8BD4000        LDMFD            sp!, {lr}   ;load return addres
+                                                            s of lr
+  284 000002B0 E12FFF1E        BX               lr          ;branches back to m
+                                                            ain code 
+  285 000002B4         
+  286 000002B4         
+  287 000002B4         
+  288 000002B4         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  289 000002B4         setup
+  290 000002B4         ;This subroutine sets up IO0DIR display on 7 segment
+  291 000002B4         
+  292 000002B4 E92D400D        STMFD            sp!,{r0,r2,r3,lr}
+  293 000002B8         
+  294 000002B8 E59F2068        LDR              r2, =IO0DIR
+  295 000002BC E59F3048        LDR              r3, =0xB780
+  296 000002C0 E5823000        STR              r3, [r2]    ;sets up the IO0DIR
+                                                            
+  297 000002C4         
+  298 000002C4 EBFFFFFE        BL               display_digit_on_7_seg ;Turns o
+                                                            n only the G segmen
+                                                            t of the 7 segment 
+                                                            display 
+  299 000002C8         
+  300 000002C8 E8BD400D        LDMFD            sp!,{r0,r2,r3,lr}
+  301 000002CC E12FFF1E        BX               lr
+  302 000002D0         ;///////////////////////////////////////////////////////
+                       // 
+  303 000002D0         pin_connect_block_setup_for_uart0
+  304 000002D0 E92D4007        STMFD            sp!, {r0, r1, lr,r2}
+  305 000002D4 E59F0050        LDR              r0, =0xE002C000 ; PINSEL0
+  306 000002D8 E5901000        LDR              r1, [r0]
+  307 000002DC E3811005        ORR              r1, r1, #5
+  308 000002E0 E3C1100A        BIC              r1, r1, #0xA
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+  309 000002E4 E5801000        STR              r1, [r0]
+  310 000002E8 E8BD4007        LDMFD            sp!, {r0, r1, lr,r2}
+  311 000002EC E12FFF1E        BX               lr
+  312 000002F0         
+  313 000002F0                 END
+              E0028000 
+              E002800C 
+              0000B7A0 
+              00009580 
+              00008780 
+              0000A680 
+              0000B680 
+              0000B780 
+              0000A380 
+              0000B380 
+              0000B480 
+              0000B080 
+              E000C000 
+              E000C014 
+              E0028008 
+              E002C000 
+Command Line: --debug --xref --diag_suppress=9931 --apcs=interwork --depend=.\o
+bjects\library6.d -o.\objects\library6.o -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v5
+\ARM\CMSIS\Include -IC:\Keil_v5\ARM\INC\Philips --predefine="__EVAL SETA 1" --p
+redefine="__UVISION_VERSION SETA 524" --list=.\listings\library6.lst library6.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+buffer 00000000
+
+Symbol: buffer
+   Definitions
+      At line 51 in file library6.s
+   Uses
+      None
+Comment: buffer unused
+clear 000000B8
+
+Symbol: clear
+   Definitions
+      At line 66 in file library6.s
+   Uses
+      At line 74 in file library6.s
+Comment: clear used once
+clear_exit 000000D4
+
+Symbol: clear_exit
+   Definitions
+      At line 76 in file library6.s
+   Uses
+      At line 69 in file library6.s
+Comment: clear_exit used once
+clear_string 000000B4
+
+Symbol: clear_string
+   Definitions
+      At line 63 in file library6.s
+   Uses
+      At line 10 in file library6.s
+Comment: clear_string used once
+display 000001B8
+
+Symbol: display
+   Definitions
+      At line 166 in file library6.s
+   Uses
+      At line 97 in file library6.s
+      At line 101 in file library6.s
+      At line 105 in file library6.s
+      At line 109 in file library6.s
+      At line 113 in file library6.s
+      At line 117 in file library6.s
+      At line 121 in file library6.s
+      At line 125 in file library6.s
+      At line 129 in file library6.s
+      At line 133 in file library6.s
+      At line 137 in file library6.s
+      At line 141 in file library6.s
+      At line 145 in file library6.s
+      At line 149 in file library6.s
+      At line 153 in file library6.s
+      At line 157 in file library6.s
+
+display_digit_on_7_seg 000000DC
+
+Symbol: display_digit_on_7_seg
+   Definitions
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 81 in file library6.s
+   Uses
+      At line 8 in file library6.s
+      At line 298 in file library6.s
+
+lib 00000000
+
+Symbol: lib
+   Definitions
+      At line 1 in file library6.s
+   Uses
+      None
+Comment: lib unused
+off_seg 000001C0
+
+Symbol: off_seg
+   Definitions
+      At line 171 in file library6.s
+   Uses
+      At line 93 in file library6.s
+Comment: off_seg used once
+output_character 00000228
+
+Symbol: output_character
+   Definitions
+      At line 225 in file library6.s
+   Uses
+      At line 3 in file library6.s
+      At line 253 in file library6.s
+      At line 271 in file library6.s
+      At line 279 in file library6.s
+      At line 281 in file library6.s
+
+output_character_begin 0000022C
+
+Symbol: output_character_begin
+   Definitions
+      At line 228 in file library6.s
+   Uses
+      At line 236 in file library6.s
+Comment: output_character_begin used once
+output_string 00000250
+
+Symbol: output_string
+   Definitions
+      At line 245 in file library6.s
+   Uses
+      At line 4 in file library6.s
+Comment: output_string used once
+output_string_begin 00000254
+
+Symbol: output_string_begin
+   Definitions
+      At line 247 in file library6.s
+   Uses
+      At line 254 in file library6.s
+Comment: output_string_begin used once
+output_string_exit 0000026C
+
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+Symbol: output_string_exit
+   Definitions
+      At line 256 in file library6.s
+   Uses
+      At line 250 in file library6.s
+Comment: output_string_exit used once
+pin_connect_block_setup_for_uart0 000002D0
+
+Symbol: pin_connect_block_setup_for_uart0
+   Definitions
+      At line 303 in file library6.s
+   Uses
+      At line 6 in file library6.s
+Comment: pin_connect_block_setup_for_uart0 used once
+prompt1 000000A9
+
+Symbol: prompt1
+   Definitions
+      At line 52 in file library6.s
+   Uses
+      None
+Comment: prompt1 unused
+read_character 00000200
+
+Symbol: read_character
+   Definitions
+      At line 205 in file library6.s
+   Uses
+      At line 2 in file library6.s
+      At line 265 in file library6.s
+
+read_character_begin 00000204
+
+Symbol: read_character_begin
+   Definitions
+      At line 208 in file library6.s
+   Uses
+      At line 216 in file library6.s
+Comment: read_character_begin used once
+read_string 00000274
+
+Symbol: read_string
+   Definitions
+      At line 262 in file library6.s
+   Uses
+      At line 5 in file library6.s
+Comment: read_string used once
+read_string_begin 00000278
+
+Symbol: read_string_begin
+   Definitions
+      At line 264 in file library6.s
+   Uses
+      At line 272 in file library6.s
+Comment: read_string_begin used once
+read_string_exit 00000294
+
+Symbol: read_string_exit
+   Definitions
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 274 in file library6.s
+   Uses
+      At line 267 in file library6.s
+Comment: read_string_exit used once
+seg_exit 000001C8
+
+Symbol: seg_exit
+   Definitions
+      At line 176 in file library6.s
+   Uses
+      At line 163 in file library6.s
+      At line 169 in file library6.s
+      At line 174 in file library6.s
+
+setup 000002B4
+
+Symbol: setup
+   Definitions
+      At line 289 in file library6.s
+   Uses
+      At line 9 in file library6.s
+Comment: setup used once
+uart_init 000001D0
+
+Symbol: uart_init
+   Definitions
+      At line 184 in file library6.s
+   Uses
+      At line 7 in file library6.s
+Comment: uart_init used once
+23 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+Hex_0 00003780
+
+Symbol: Hex_0
+   Definitions
+      At line 30 in file library6.s
+   Uses
+      At line 96 in file library6.s
+Comment: Hex_0 used once
+Hex_1 00000300
+
+Symbol: Hex_1
+   Definitions
+      At line 31 in file library6.s
+   Uses
+      At line 100 in file library6.s
+Comment: Hex_1 used once
+Hex_2 00009580
+
+Symbol: Hex_2
+   Definitions
+      At line 32 in file library6.s
+   Uses
+      At line 104 in file library6.s
+Comment: Hex_2 used once
+Hex_3 00008780
+
+Symbol: Hex_3
+   Definitions
+      At line 33 in file library6.s
+   Uses
+      At line 108 in file library6.s
+Comment: Hex_3 used once
+Hex_4 0000A300
+
+Symbol: Hex_4
+   Definitions
+      At line 34 in file library6.s
+   Uses
+      At line 112 in file library6.s
+Comment: Hex_4 used once
+Hex_5 0000A680
+
+Symbol: Hex_5
+   Definitions
+      At line 35 in file library6.s
+   Uses
+      At line 116 in file library6.s
+Comment: Hex_5 used once
+Hex_6 0000B680
+
+Symbol: Hex_6
+   Definitions
+      At line 36 in file library6.s
+   Uses
+      At line 120 in file library6.s
+Comment: Hex_6 used once
+Hex_7 00000380
+
+Symbol: Hex_7
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Absolute symbols
+
+   Definitions
+      At line 37 in file library6.s
+   Uses
+      At line 124 in file library6.s
+Comment: Hex_7 used once
+Hex_8 0000B780
+
+Symbol: Hex_8
+   Definitions
+      At line 38 in file library6.s
+   Uses
+      At line 128 in file library6.s
+Comment: Hex_8 used once
+Hex_9 0000A380
+
+Symbol: Hex_9
+   Definitions
+      At line 39 in file library6.s
+   Uses
+      At line 132 in file library6.s
+Comment: Hex_9 used once
+Hex_a 0000B380
+
+Symbol: Hex_a
+   Definitions
+      At line 40 in file library6.s
+   Uses
+      At line 136 in file library6.s
+Comment: Hex_a used once
+Hex_b 0000B600
+
+Symbol: Hex_b
+   Definitions
+      At line 41 in file library6.s
+   Uses
+      At line 140 in file library6.s
+Comment: Hex_b used once
+Hex_c 00003480
+
+Symbol: Hex_c
+   Definitions
+      At line 42 in file library6.s
+   Uses
+      At line 144 in file library6.s
+Comment: Hex_c used once
+Hex_d 00009700
+
+Symbol: Hex_d
+   Definitions
+      At line 43 in file library6.s
+   Uses
+      At line 148 in file library6.s
+Comment: Hex_d used once
+Hex_e 0000B480
+
+Symbol: Hex_e
+   Definitions
+      At line 44 in file library6.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Absolute symbols
+
+      At line 152 in file library6.s
+Comment: Hex_e used once
+Hex_f 0000B080
+
+Symbol: Hex_f
+   Definitions
+      At line 45 in file library6.s
+   Uses
+      At line 156 in file library6.s
+Comment: Hex_f used once
+Hex_g 00008000
+
+Symbol: Hex_g
+   Definitions
+      At line 29 in file library6.s
+   Uses
+      None
+Comment: Hex_g unused
+Hex_off 0000B7A0
+
+Symbol: Hex_off
+   Definitions
+      At line 46 in file library6.s
+   Uses
+      At line 92 in file library6.s
+Comment: Hex_off used once
+IO0CLR E002800C
+
+Symbol: IO0CLR
+   Definitions
+      At line 24 in file library6.s
+   Uses
+      At line 89 in file library6.s
+Comment: IO0CLR used once
+IO0DIR E0028008
+
+Symbol: IO0DIR
+   Definitions
+      At line 22 in file library6.s
+   Uses
+      At line 294 in file library6.s
+Comment: IO0DIR used once
+IO0SET E0028000
+
+Symbol: IO0SET
+   Definitions
+      At line 23 in file library6.s
+   Uses
+      At line 88 in file library6.s
+Comment: IO0SET used once
+IO1CLR E002801C
+
+Symbol: IO1CLR
+   Definitions
+      At line 20 in file library6.s
+   Uses
+      None
+Comment: IO1CLR unused
+IO1DIR E0028018
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Absolute symbols
+
+
+Symbol: IO1DIR
+   Definitions
+      At line 18 in file library6.s
+   Uses
+      None
+Comment: IO1DIR unused
+IO1PIN E0028010
+
+Symbol: IO1PIN
+   Definitions
+      At line 19 in file library6.s
+   Uses
+      None
+Comment: IO1PIN unused
+IO1SET E0028014
+
+Symbol: IO1SET
+   Definitions
+      At line 21 in file library6.s
+   Uses
+      None
+Comment: IO1SET unused
+PINSEL0 E002C000
+
+Symbol: PINSEL0
+   Definitions
+      At line 25 in file library6.s
+   Uses
+      None
+Comment: PINSEL0 unused
+Seg 0000B7A0
+
+Symbol: Seg
+   Definitions
+      At line 28 in file library6.s
+   Uses
+      None
+Comment: Seg unused
+THRE 00000020
+
+Symbol: THRE
+   Definitions
+      At line 17 in file library6.s
+   Uses
+      At line 233 in file library6.s
+      At line 234 in file library6.s
+
+U0IER 00000004
+
+Symbol: U0IER
+   Definitions
+      At line 15 in file library6.s
+   Uses
+      At line 195 in file library6.s
+Comment: U0IER used once
+U0LCR 0000000C
+
+Symbol: U0LCR
+
+
+
+ARM Macro Assembler    Page 5 Alphabetic symbol ordering
+Absolute symbols
+
+   Definitions
+      At line 16 in file library6.s
+   Uses
+      At line 189 in file library6.s
+      At line 198 in file library6.s
+
+U0LSR 00000014
+
+Symbol: U0LSR
+   Definitions
+      At line 14 in file library6.s
+   Uses
+      None
+Comment: U0LSR unused
+31 symbols
+388 symbols in table

@@ -1,0 +1,1330 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             interrupts, CODE, READWRITE
+    2 00000000                 EXPORT           lab6
+    3 00000000                 EXPORT           FIQ_Handler
+    4 00000000                 EXPORT           interrupt_init
+    5 00000000                 EXTERN           setup
+    6 00000000                 EXTERN           output_string
+    7 00000000                 EXTERN           read_string
+    8 00000000                 EXTERN           read_character
+    9 00000000                 EXTERN           output_character
+   10 00000000                 EXTERN           display_digit_on_7_seg
+   11 00000000                 EXTERN           clear_string
+   12 00000000                 EXTERN           uart_init
+   13 00000000         
+   14 00000000 E0028008 
+                       IO0DIR  EQU              0xE0028008
+   15 00000000 E000C008 
+                       U0IIR   EQU              0xE000C008  ;  UART0 Interrupt 
+                                                            Identification Regi
+                                                            ster
+   16 00000000 E000C004 
+                       U0IER   EQU              0xE000C004  ; UART0 interrupt e
+                                                            nable register
+   17 00000000 E01FC140 
+                       EXTINT  EQU              0xE01FC140  ;  External Interru
+                                                            pt Flag Register
+   18 00000000 E0004004 
+                       T0TCR   EQU              0xE0004004
+   19 00000000 E000401C 
+                       MR1     EQU              0xE000401C
+   20 00000000 E0004014 
+                       T0MCR   EQU              0xE0004014
+   21 00000000 E0004000 
+                       T0IR    EQU              0xE0004000
+   22 00000000         
+   23 00000000 57 65 6C 
+              63 6F 6D 
+              65 20 74 
+              6F 20 6C 
+              61 62 20 
+              23 35 00 prompt  =                "Welcome to lab #5",0
+   24 00000012 00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00    timerbuffer
+                               =                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0",0
+   25 00000026 00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00    storebuffer1
+                               =                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0",0
+   26 0000003A         
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   27 0000003A         ;///////////////////////////////////////////////////////
+                       //////////////////
+   28 0000003A         ;function 3 strings
+   29 0000003A 0C 45 6E 
+              74 65 72 
+              20 61 20 
+              34 20 64 
+              69 67 69 
+              74 20 68 
+              65 78 61 
+              64 65 63 
+              69 6D 61 
+              6C 20 6E 
+              75 6D 62 
+              65 72 20 
+              75 73 69 
+              6E 67 20 
+              63 68 61 
+              72 61 63 
+              74 65 72 
+              73 20 30 
+              2D 39 20 
+              41 2D 46 
+              2E 20 0A 
+              0D 0A 0D 
+              49 6E 20 
+              75 70 70 
+              65 72 63 
+              61 73 65 
+              20 77 69 
+              74 68 20 
+              41 20 72 
+              65 70 72 
+              65 73 65 
+              6E 74 69 
+              6E 67 20 
+              31 30 20 
+              61 6E 64 
+              20 46 20 
+              72 65 70 
+              72 65 73 
+              65 6E 74 
+              69 6E 67 
+              20 31 35 
+              20 72 65 
+              73 70 65 
+              63 74 69 
+              76 65 6C 
+              79 2E 0A 
+              0D 00    seg1    =                "\fEnter a 4 digit hexadecimal 
+number using characters 0-9 A-F. \n\r\n\rIn uppercase with A representing 10 an
+d F representing 15 respectively.\n\r", 0
+   30 000000C6 0A 0D 54 
+              68 65 20 
+              6E 75 6D 
+              62 65 72 
+              20 77 69 
+              6C 6C 20 
+              62 65 20 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+              64 69 73 
+              70 6C 61 
+              79 65 64 
+              20 6F 6E 
+              20 74 68 
+              65 20 73 
+              65 76 65 
+              6E 20 73 
+              65 67 6D 
+              65 6E 74 
+              20 64 69 
+              73 70 6C 
+              61 79 2E 
+              0A 0D 00 seg2    =                "\n\rThe number will be display
+ed on the seven segment display.\n\r", 0
+   31 00000105 0A 0D 0A 
+              0D 50 72 
+              65 73 73 
+              20 71 20 
+              74 6F 20 
+              72 65 74 
+              75 72 6E 
+              20 74 6F 
+              20 6D 61 
+              69 6E 20 
+              6D 65 6E 
+              75 2E 0A 
+              0D 0A 0D 
+              00       seg3    =                "\n\r\n\rPress q to return to m
+ain menu.\n\r\n\r", 0
+   32 0000012D 0A 0D 49 
+              6E 76 61 
+              6C 69 64 
+              20 69 6E 
+              70 75 74 
+              2E 20 50 
+              6C 65 61 
+              73 65 20 
+              74 72 79 
+              20 61 67 
+              61 69 6E 
+              2E 0A 0D 
+              00       invalid =                "\n\rInvalid input. Please try 
+again.\n\r" , 0
+   33 00000152         ;///////////////////////////////////////////////////////
+                       //////////////////
+   34 00000152         
+   35 00000152 0C 0A 0D 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              57 65 20 
+              61 72 65 
+              20 64 6F 
+              6E 65 20 
+              42 6F 79 
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+              79 79 79 
+              79 79 00 exit    =                "\f\n\r                  We are
+ done Boyyyyyy",0
+   36 0000017C         
+   37 0000017C                 ALIGN
+   38 0000017C         
+   39 0000017C         lab6
+   40 0000017C E92D4000        STMFD            sp!, {lr}
+   41 00000180         
+   42 00000180 E3A07001        MOV              r7, #1      ;r7 holds the state
+                                                             of the 7 seg displ
+                                                            ay 1 is off, -1 is 
+                                                            on
+   43 00000184 E3A06000        MOV              r6, #0      ;Holds which displa
+                                                            y to display the nu
+                                                            mber. 0 is leftmost
+                                                             display 3 is right
+                                                            most display
+   44 00000188         
+   45 00000188 EBFFFFFE        BL               setup
+   46 0000018C EBFFFFFE        BL               uart_init
+   47 00000190 EBFFFFFE        BL               interrupt_init
+   48 00000194         
+   49 00000194         
+   50 00000194         ;This block prints instructions for the program
+   51 00000194         function_seg
+   52 00000194 E59F1314        LDR              r1, =seg1
+   53 00000198 EBFFFFFE        BL               output_string
+   54 0000019C E59F1310        LDR              r1, =seg2
+   55 000001A0 EBFFFFFE        BL               output_string
+   56 000001A4 E59F130C        LDR              r1, =seg3
+   57 000001A8 EBFFFFFE        BL               output_string
+   58 000001AC         ; End of priting instructions
+   59 000001AC E59F4308        LDR              r4, =timerbuffer ;timerbuffer w
+                                                            ith what is display
+                                                            ed
+   60 000001B0 E59F5308        LDR              r5, =storebuffer1 ;Loads tempor
+                                                            ary timerbuffer whi
+                                                            ch stores input
+   61 000001B4         
+   62 000001B4         loop_begin
+   63 000001B4 EAFFFFFE        B                loop_begin  ;Infinite loop
+   64 000001B8         
+   65 000001B8         ;///////////////////////////////////////////////////////
+                       //////////////// 
+   66 000001B8         ;Interrupt init initializes all interrupts used in this 
+                       case external interrupt 1, uart0 interrupt, and timer0 i
+                       nterrupt
+   67 000001B8         
+   68 000001B8         interrupt_init
+   69 000001B8 E92D400F        STMFD            SP!, {r0-r3, lr} 
+                                                            ; Save registers 
+   70 000001BC         
+   71 000001BC         
+   72 000001BC         ; Push button setup   
+   73 000001BC E59F0300        LDR              r0, =0xE002C000
+   74 000001C0 E5901000        LDR              r1, [r0]
+   75 000001C4 E3811202        ORR              r1, r1, #0x20000000
+   76 000001C8 E3C11201        BIC              r1, r1, #0x10000000
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+   77 000001CC E5801000        STR              r1, [r0]    ; PINSEL0 bits 29:2
+                                                            8 = 10
+   78 000001D0         
+   79 000001D0         ; Classify sources as IRQ or FIQ
+   80 000001D0 E59F02F0        LDR              r0, =0xFFFFF000
+   81 000001D4 E590100C        LDR              r1, [r0, #0xC]
+   82 000001D8 E59F22EC        LDR              r2, =0x8050 ;Classifies UART0,P
+                                                            ush button, and tim
+                                                            er0 as FIQ
+   83 000001DC E1811002        ORR              r1, r1, r2
+   84 000001E0 E580100C        STR              r1, [r0, #0xC]
+   85 000001E4         
+   86 000001E4         ; Enable Interrupts
+   87 000001E4 E59F02DC        LDR              r0, =0xFFFFF000
+   88 000001E8 E5901010        LDR              r1, [r0, #0x10]
+   89 000001EC E59F22D8        LDR              r2, =0x8050 ;Enables UART0,Push
+                                                             button, and timer0
+                                                             interrupts
+   90 000001F0 E1811002        ORR              r1, r1 ,r2
+   91 000001F4 E5801010        STR              r1, [r0, #0x10]
+   92 000001F8         
+   93 000001F8         ;Enable UART0 interrupts
+   94 000001F8 E59F02D0        LDR              r0, =U0IER
+   95 000001FC E5901000        LDR              r1, [r0]
+   96 00000200 E3811001        ORR              r1, r1, #1  ; Enables UART0 int
+                                                            errupts
+   97 00000204 E5801000        STR              r1, [r0]
+   98 00000208         
+   99 00000208         ;Enables timer0, allows it to interrupt
+  100 00000208 E59F02C4        LDR              r0, =T0TCR
+  101 0000020C E5901000        LDR              r1, [r0]
+  102 00000210 E3A02001        LDR              r2, =0x1
+  103 00000214 E1811002        ORR              r1, r1, r2
+  104 00000218 E5801000        STR              r1, [r0]
+  105 0000021C         
+  106 0000021C         ;Sets up T0MCR0, MR1
+  107 0000021C E59F02B4        LDR              r0, =MR1
+  108 00000220 E3A03A09        LDR              r3, =0x9000 ;Sets frequency to 
+                                                            60-1000hz
+  109 00000224 E5803000        STR              r3, [r0]
+  110 00000228 E59F02AC        LDR              r0, =T0MCR
+  111 0000022C E5901000        LDR              r1, [r0]
+  112 00000230 E3A02018        LDR              r2, =0x18
+  113 00000234 E1811002        ORR              r1, r1, r2
+  114 00000238 E5801000        STR              r1, [r0]
+  115 0000023C         
+  116 0000023C         ; External Interrupt 1 setup for edge sensitive
+  117 0000023C E59F029C        LDR              r0, =0xE01FC148
+  118 00000240 E5901000        LDR              r1, [r0]
+  119 00000244 E3811002        ORR              r1, r1, #2  ; EINT1 = Edge Sens
+                                                            itive
+  120 00000248 E5801000        STR              r1, [r0]
+  121 0000024C         
+  122 0000024C         ; Enable FIQ's, Disable IRQ's
+  123 0000024C E10F0000        MRS              r0, CPSR
+  124 00000250 E3C00040        BIC              r0, r0, #0x40
+  125 00000254 E3800080        ORR              r0, r0, #0x80
+  126 00000258 E121F000        MSR              CPSR_c, r0
+  127 0000025C         
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+  128 0000025C E8BD400F        LDMFD            SP!, {r0-r3, lr} 
+                                                            ; Restore registers
+                                                            
+  129 00000260 E12FFF1E        BX               lr          ; Return
+  130 00000264         
+  131 00000264         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  132 00000264         
+  133 00000264         ;FIQ handler handles each type of interrupt, external in
+                       terrupt 1, uart0 interrupt and timer0 interrupt
+  134 00000264         
+  135 00000264         FIQ_Handler
+  136 00000264 E92D400F        STMFD            SP!, {r0-r3, lr} 
+                                                            ; Save registers 
+  137 00000268         
+  138 00000268         EINT1                                ; Check for EINT1 i
+                                                            nterrupt
+  139 00000268 E59F0274        LDR              r0, =0xE01FC140
+  140 0000026C E5901000        LDR              r1, [r0]
+  141 00000270 E3110002        TST              r1, #2      ; paired up: branch
+                                                             to push_case , not
+                                                             paired up jump FIQ
+                                                            _Exit
+  142 00000274 0A000000        BEQ              UART0
+  143 00000278 EA000009        B                push_case
+  144 0000027C         
+  145 0000027C         UART0                                ; Check for UART0 i
+                                                            nterrupt by lookiin
+                                                            g at bit 0 of U0IIR
+                                                            , 1 no interrupt, 0
+                                                             pending interrupt 
+                                                            
+  146 0000027C E59F0264        LDR              r0, =U0IIR
+  147 00000280 E5901000        LDR              r1, [r0]
+  148 00000284 E3110001        TST              r1, #1      ; Paired up: branch
+                                                             to FIQ_exit, not p
+                                                            aired up branch to 
+                                                            uart0_case 
+  149 00000288 1A000000        BNE              TIMER0
+  150 0000028C EA00000B        B                uart0_case
+  151 00000290         
+  152 00000290         TIMER0                               ; Checks for timer0
+                                                             interrupt by check
+                                                            ing bit 1 of T0IR
+  153 00000290 E59F0254        LDR              r0, =T0IR
+  154 00000294 E5901000        LDR              r1, [r0]
+  155 00000298 E3110002        TST              r1, #2      ; paired up: branch
+                                                             to push_case , not
+                                                             paired up jump FIQ
+                                                            _Exit
+  156 0000029C 0A000014        BEQ              FIQ_Exit
+  157 000002A0 EA00000D        B                timer0_case
+  158 000002A4         
+  159 000002A4         push_case
+  160 000002A4 E92D400F        STMFD            SP!, {r0-r3, lr} 
+                                                            ; Save registers 
+  161 000002A8         
+  162 000002A8 E3A02000        MOV              r2, #0
+  163 000002AC E0427007        SUB              r7, r2, r7  ; Changes sign of r
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+                                                            7 (corresponds to o
+                                                            n off) positive off
+                                                            , negative on
+  164 000002B0         
+  165 000002B0 E8BD400F        LDMFD            SP!, {r0-r3, lr} 
+                                                            ; Restore registers
+                                                            
+  166 000002B4         
+  167 000002B4 E3811002        ORR              r1, r1, #2  ; Clear Interrupt
+  168 000002B8 E5801000        STR              r1, [r0]
+  169 000002BC EA00000C        B                FIQ_Exit
+  170 000002C0         
+  171 000002C0         uart0_case
+  172 000002C0         ;uart0 interrupt is handled by building the number to be
+                        displayed as a string
+  173 000002C0 E92D400F        STMFD            SP!, {r0-r3, lr} 
+                                                            ; Save registers 
+  174 000002C4         
+  175 000002C4 E59F1224        LDR              r1, =0xE000C000
+  176 000002C8 E5910000        LDR              r0, [r1]    ; Reads character f
+                                                            rom recieve registe
+                                                            r
+  177 000002CC EBFFFFFE        BL               output_character ; Echoes back 
+                                                            to putty
+  178 000002D0         
+  179 000002D0 EB000009        BL               uart0_comparisons
+  180 000002D4         
+  181 000002D4 E8BD400F        LDMFD            SP!, {r0-r3, lr}
+  182 000002D8         
+  183 000002D8 EA000005        B                FIQ_Exit
+  184 000002DC         
+  185 000002DC         timer0_case
+  186 000002DC         ;timer interrupt is handled by repeatedly strobing 
+  187 000002DC E92D400F        STMFD            SP!, {r0-r3, lr}
+  188 000002E0         
+  189 000002E0 EB00002B        BL               strobing
+  190 000002E4         
+  191 000002E4 E8BD400F        LDMFD            SP!, {r0-r3, lr}
+  192 000002E8         
+  193 000002E8 E3811002        ORR              r1, r1, #2  ; Clear timer inter
+                                                            rupt
+  194 000002EC E5801000        STR              r1, [r0]
+  195 000002F0 EAFFFFFF        B                FIQ_Exit
+  196 000002F4         
+  197 000002F4         FIQ_Exit
+  198 000002F4 E8BD400F        LDMFD            SP!, {r0-r3, lr}
+  199 000002F8 E25EF004        SUBS             pc, lr, #4
+  200 000002FC         
+  201 000002FC         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  202 000002FC         
+  203 000002FC         uart0_comparisons
+  204 000002FC         ;uart0_comparisons limits available inputs and test inpu
+                       ts 
+  205 000002FC         ;q to exit
+  206 000002FC         ;enter as indication number is done being entered
+  207 000002FC         ;limits inputs to 0-9 and A-F
+  208 000002FC E92D4214        STMFD            SP!, {r2,r4,r9,lr}
+  209 00000300 E3A02000        MOV              r2, #0      ;temp used for subt
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+                                                            racting 
+  210 00000304         
+  211 00000304 E3500071        CMP              r0, #0x71   ; If read character
+                                                             is q terminate pro
+                                                            gram, otherwise dis
+                                                            play on 7 segment
+  212 00000308 0A000060        BEQ              menu_exit
+  213 0000030C         
+  214 0000030C E350000D        CMP              r0, #0xD    ; If read character
+                                                             is enter terminate
+                                                             add null to string
+                                                             and then display o
+                                                            n 7 segment
+  215 00000310 0A00000A        BEQ              enter_case
+  216 00000314         
+  217 00000314 E350002F        CMP              r0, #0x2F   ; If read character
+                                                             is less than or eq
+                                                            ual to #47 invalid 
+                                                            input
+  218 00000318 DA000016        BLE              invalid_case
+  219 0000031C         
+  220 0000031C E3500039        CMP              r0, #0x39   ; If read character
+                                                             is greater than #4
+                                                            7 less than or equa
+                                                            l to #57 valid inpu
+                                                            t
+  221 00000320 DA000004        BLE              valid_number
+  222 00000324         
+  223 00000324 E3500040        CMP              r0, #0x40   ; If read character
+                                                             is less than or eq
+                                                            ual to #64 invalid 
+                                                            input
+  224 00000328 DA000012        BLE              invalid_case
+  225 0000032C         
+  226 0000032C E3500046        CMP              r0, #0x46   ; If read character
+                                                             is greater than #6
+                                                            4 and less than or 
+                                                            equal to #70 valid 
+                                                            input 
+  227 00000330 DA000000        BLE              valid_number
+  228 00000334         
+  229 00000334 EA00000F        B                invalid_case
+  230 00000338         
+  231 00000338         valid_number
+  232 00000338         
+  233 00000338 E4C50001        STRB             r0, [r5], #1 ;If character is 0
+                                                            -9 A-F store it int
+                                                            o storebuffer1
+  234 0000033C         
+  235 0000033C EA000012        B                comparison_exit
+  236 00000340         
+  237 00000340         enter_case
+  238 00000340         
+  239 00000340 E59F9174        LDR              r9, =timerbuffer
+  240 00000344 E5D90000        LDRB             r0, [r9]
+  241 00000348 E3500000        CMP              r0, #0x0    ;test first charact
+                                                            er of timerbuffer i
+                                                            f it is null, first
+                                                             time running turn 
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+                                                            display on
+  242 0000034C 1A000002        BNE              not_firsttime ;If first charact
+                                                            er of timer buffer 
+                                                            is non null add 
+  243 00000350 E3570000        CMP              r7, #0
+  244 00000354 BA000000        BLT              not_firsttime
+  245 00000358 E0427007        SUB              r7, r2, r7
+  246 0000035C         
+  247 0000035C         not_firsttime
+  248 0000035C         
+  249 0000035C E3A00000        LDR              r0, =0x0    ;When enter is read
+                                                             stores null to det
+                                                            ermine end of strin
+                                                            g 
+  250 00000360 E4C50001        STRB             r0, [r5], #1
+  251 00000364 E3A0000A        MOV              r0, #0xA
+  252 00000368 EBFFFFFE        BL               output_character ;outputs new l
+                                                            ine in putty 
+  253 0000036C EB000038        BL               move_string ;Moves the content 
+                                                            of storebuffer1 to 
+                                                            timerbuffer1
+  254 00000370 E59F5148        LDR              r5, =storebuffer1 ;reloads stor
+                                                            ebuffer1 to r5 rese
+                                                            ts it
+  255 00000374         
+  256 00000374 EA000004        B                comparison_exit
+  257 00000378         
+  258 00000378         invalid_case
+  259 00000378         
+  260 00000378 E59F4140        LDR              r4, =storebuffer1 ;loads storeb
+                                                            uffer1 to r4 to be 
+                                                            cleared
+  261 0000037C EBFFFFFE        BL               clear_string ;Clears r4 buffer
+  262 00000380 E59F116C        LDR              r1, =invalid ;displays invalid 
+                                                            output string
+  263 00000384 EBFFFFFE        BL               output_string
+  264 00000388         
+  265 00000388 EAFFFFFF        B                comparison_exit
+  266 0000038C         
+  267 0000038C         comparison_exit
+  268 0000038C         
+  269 0000038C E8BD4214        LDMFD            SP!, {r2,r4,r9,lr}
+  270 00000390 E12FFF1E        BX               lr
+  271 00000394         
+  272 00000394         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  273 00000394         
+  274 00000394         strobing
+  275 00000394         ;Strobing increments r0 the display number, and r4 which
+                        contains address to timerbuffer.
+  276 00000394         ;Using these two registers it display the respective dig
+                       it in the string to the respective 7 segment display
+  277 00000394         ;leftmost display is r0 = 0, it displays character at th
+                       e 0th position of the buffer etc 
+  278 00000394 E92D400F        STMFD            SP!, {r0-r3,lr}
+  279 00000398 E59F0158        LDR              r0, =IO0DIR
+  280 0000039C         
+  281 0000039C E3560000        CMP              r6, #0      ;compares r0 to 0 
+  282 000003A0 0A000005        BEQ              first_digit
+
+
+
+ARM Macro Assembler    Page 10 
+
+
+  283 000003A4         
+  284 000003A4 E3560001        CMP              r6, #1      ;compares r0 to 1
+  285 000003A8 0A00000C        BEQ              second_digit
+  286 000003AC         
+  287 000003AC E3560002        CMP              r6, #2      ;compares r0 to 2 
+  288 000003B0 0A000013        BEQ              third_digit
+  289 000003B4         
+  290 000003B4 E3560003        CMP              r6, #3      ;compares r0 to 3
+  291 000003B8 0A00001A        BEQ              fourth_digit
+  292 000003BC         
+  293 000003BC         first_digit
+  294 000003BC E5901000        LDR              r1, [r0]    ;Turns on the left 
+                                                            most 7 segment disp
+                                                            lay 
+  295 000003C0 E3C1103C        BIC              r1, #0x3C
+  296 000003C4 E3811004        ORR              r1, #0x4
+  297 000003C8 E5801000        STR              r1, [r0]
+  298 000003CC         
+  299 000003CC E5D40000        LDRB             r0, [r4]    ;loads character at
+                                                             the 0th position o
+                                                            f timerbuffer 
+  300 000003D0         
+  301 000003D0 EBFFFFFE        BL               display_digit_on_7_seg ;display
+                                                            s it on the 7 segme
+                                                            nt display 
+  302 000003D4         
+  303 000003D4 E2866001        ADD              r6, r6, #1  ;increments r0 by 1
+                                                             to prepare to disp
+                                                            lay next number on 
+                                                            next 7 segment disp
+                                                            lay 
+  304 000003D8 E2844001        ADD              r4, r4, #1  ;increments the pos
+                                                            ition of the string
+                                                             by 1
+  305 000003DC         
+  306 000003DC EA00001A        B                strobing_exit
+  307 000003E0         second_digit
+  308 000003E0 E5901000        LDR              r1, [r0]    ;Turns on the next 
+                                                            2nd digit 7 segment
+                                                             display 
+  309 000003E4 E3C1103C        BIC              r1, #0x3C
+  310 000003E8 E3811008        ORR              r1, #0x8
+  311 000003EC E5801000        STR              r1, [r0]
+  312 000003F0         
+  313 000003F0 E5D40000        LDRB             r0, [r4]    ;loads second digit
+                                                             of the entered num
+                                                            ber 
+  314 000003F4         
+  315 000003F4 EBFFFFFE        BL               display_digit_on_7_seg ;display
+                                                            s second digit of e
+                                                            ntered number on 7 
+                                                            segment display
+  316 000003F8         
+  317 000003F8 E2866001        ADD              r6, r6, #1  ;increments r0 by 1
+                                                            
+  318 000003FC E2844001        ADD              r4, r4, #1  ;increments positio
+                                                            n of string by 1 
+  319 00000400         
+  320 00000400 EA000011        B                strobing_exit
+
+
+
+ARM Macro Assembler    Page 11 
+
+
+  321 00000404         third_digit
+  322 00000404 E5901000        LDR              r1, [r0]    ;turns on the 3rd d
+                                                            igit 7 segment disp
+                                                            lay 
+  323 00000408 E3C1103C        BIC              r1, #0x3C
+  324 0000040C E3811010        ORR              r1, #0x10
+  325 00000410 E5801000        STR              r1, [r0]
+  326 00000414         
+  327 00000414 E5D40000        LDRB             r0, [r4]    ;loads third digit 
+                                                            of entered number 
+  328 00000418         
+  329 00000418 EBFFFFFE        BL               display_digit_on_7_seg ;display
+                                                             the 3rd digit on t
+                                                            he 7 segment displa
+                                                            y 
+  330 0000041C         
+  331 0000041C E2866001        ADD              r6, r6, #1  ;increments r0 by 1
+                                                            
+  332 00000420 E2844001        ADD              r4, r4, #1  ;increments positio
+                                                            n of string by 1 
+  333 00000424         
+  334 00000424 EA000008        B                strobing_exit
+  335 00000428         fourth_digit
+  336 00000428 E5901000        LDR              r1, [r0]    ;loads 4th digit, a
+                                                            lso the rightmost d
+                                                            isplay
+  337 0000042C E3C1103C        BIC              r1, #0x3C
+  338 00000430 E3811020        ORR              r1, #0x20
+  339 00000434 E5801000        STR              r1, [r0]
+  340 00000438         
+  341 00000438 E5D40000        LDRB             r0, [r4]    ;loads last digit o
+                                                            f entered number 
+  342 0000043C         
+  343 0000043C EBFFFFFE        BL               display_digit_on_7_seg ;display
+                                                            s last digit on 7 s
+                                                            egment display 
+  344 00000440         
+  345 00000440 E3A06000        MOV              r6, #0      ;resets r6 to 0 whi
+                                                            ch makes next numbe
+                                                            r be displayed on l
+                                                            eftmost display 
+  346 00000444 E59F4070        LDR              r4, =timerbuffer ;resets the ti
+                                                            merbuffer which sta
+                                                            rts the process of 
+                                                            strobing all over a
+                                                            gain
+  347 00000448         
+  348 00000448 EAFFFFFF        B                strobing_exit
+  349 0000044C         
+  350 0000044C         strobing_exit
+  351 0000044C         
+  352 0000044C E8BD400F        LDMFD            SP!, {r0-r3,lr}
+  353 00000450 E12FFF1E        BX               lr
+  354 00000454         
+  355 00000454         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  356 00000454         
+  357 00000454         ;Move string moves content of storebuffer1 to timerbuffe
+                       r and clears storebuffer1
+
+
+
+ARM Macro Assembler    Page 12 
+
+
+  358 00000454         
+  359 00000454         move_string
+  360 00000454 E92D403F        STMFD            SP!, {r0-r5,lr}
+  361 00000458         
+  362 00000458 E59F405C        LDR              r4, =timerbuffer ;loads timerbu
+                                                            ffer to be cleared
+  363 0000045C EBFFFFFE        BL               clear_string ;clears timerbuffe
+                                                            r 
+  364 00000460 E59F4054        LDR              r4, =timerbuffer ;reloads timer
+                                                            buffer
+  365 00000464 E59F5054        LDR              r5, =storebuffer1 ;loads storeb
+                                                            uffer1 
+  366 00000468         
+  367 00000468         switch_loop
+  368 00000468         
+  369 00000468 E5D50000        LDRB             r0, [r5]    ;loads character fr
+                                                            om storebuffer1 
+  370 0000046C E5C40000        STRB             r0, [r4]    ;stores loaded char
+                                                            acter to timerbuffe
+                                                            r equivalent to mov
+                                                            ing charcter to tim
+                                                            erbuffer
+  371 00000470 E2844001        ADD              r4, r4, #1  ;increments buffer
+  372 00000474 E2855001        ADD              r5, r5, #1  ;increments buffer
+  373 00000478         
+  374 00000478 E3500000        CMP              r0, #0x0    ;ends when the read
+                                                             character is null
+  375 0000047C 1AFFFFF9        BNE              switch_loop
+  376 00000480         
+  377 00000480 E59F4038        LDR              r4, =storebuffer1 ;loads storeb
+                                                            uffer1 to be cleare
+                                                            d
+  378 00000484 EBFFFFFE        BL               clear_string ;clears storebuffe
+                                                            r1 
+  379 00000488         
+  380 00000488 E8BD403F        LDMFD            sp!, {r0-r5, lr}
+  381 0000048C E12FFF1E        BX               lr
+  382 00000490         
+  383 00000490         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  384 00000490         menu_exit
+  385 00000490 E59F1064        LDR              r1, =exit
+  386 00000494 EBFFFFFE        BL               output_string
+  387 00000498         
+  388 00000498 E3570000        CMP              r7, #0      ;turns off 7 segmen
+                                                            t if it is currentl
+                                                            y on when program e
+                                                            nds
+  389 0000049C CA000001        BGT              exit_program
+  390 000004A0 E0467007        SUB              r7, r6, r7
+  391 000004A4 EBFFFFFE        BL               display_digit_on_7_seg
+  392 000004A8         
+  393 000004A8         exit_program
+  394 000004A8         
+  395 000004A8 E8BD4000        LDMFD            SP!, {lr}   ; Restore register 
+                                                            lr from stack 
+  396 000004AC E12FFF1E        BX               LR
+  397 000004B0         
+  398 000004B0                 END
+
+
+
+ARM Macro Assembler    Page 13 
+
+
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              E002C000 
+              FFFFF000 
+              00008050 
+              E000C004 
+              E0004004 
+              E000401C 
+              E0004014 
+              E01FC148 
+              E01FC140 
+              E000C008 
+              E0004000 
+              E000C000 
+              00000000 
+              E0028008 
+              00000000 
+Command Line: --debug --xref --diag_suppress=9931 --apcs=interwork --depend=.\o
+bjects\lab6.d -o.\objects\lab6.o -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v5\ARM\CMS
+IS\Include -IC:\Keil_v5\ARM\INC\Philips --predefine="__EVAL SETA 1" --predefine
+="__UVISION_VERSION SETA 524" --list=.\listings\lab6.lst lab6.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+EINT1 00000268
+
+Symbol: EINT1
+   Definitions
+      At line 138 in file lab6.s
+   Uses
+      None
+Comment: EINT1 unused
+FIQ_Exit 000002F4
+
+Symbol: FIQ_Exit
+   Definitions
+      At line 197 in file lab6.s
+   Uses
+      At line 156 in file lab6.s
+      At line 169 in file lab6.s
+      At line 183 in file lab6.s
+      At line 195 in file lab6.s
+
+FIQ_Handler 00000264
+
+Symbol: FIQ_Handler
+   Definitions
+      At line 135 in file lab6.s
+   Uses
+      At line 3 in file lab6.s
+Comment: FIQ_Handler used once
+TIMER0 00000290
+
+Symbol: TIMER0
+   Definitions
+      At line 152 in file lab6.s
+   Uses
+      At line 149 in file lab6.s
+Comment: TIMER0 used once
+UART0 0000027C
+
+Symbol: UART0
+   Definitions
+      At line 145 in file lab6.s
+   Uses
+      At line 142 in file lab6.s
+Comment: UART0 used once
+comparison_exit 0000038C
+
+Symbol: comparison_exit
+   Definitions
+      At line 267 in file lab6.s
+   Uses
+      At line 235 in file lab6.s
+      At line 256 in file lab6.s
+      At line 265 in file lab6.s
+
+enter_case 00000340
+
+Symbol: enter_case
+   Definitions
+      At line 237 in file lab6.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 215 in file lab6.s
+Comment: enter_case used once
+exit 00000152
+
+Symbol: exit
+   Definitions
+      At line 35 in file lab6.s
+   Uses
+      At line 385 in file lab6.s
+Comment: exit used once
+exit_program 000004A8
+
+Symbol: exit_program
+   Definitions
+      At line 393 in file lab6.s
+   Uses
+      At line 389 in file lab6.s
+Comment: exit_program used once
+first_digit 000003BC
+
+Symbol: first_digit
+   Definitions
+      At line 293 in file lab6.s
+   Uses
+      At line 282 in file lab6.s
+Comment: first_digit used once
+fourth_digit 00000428
+
+Symbol: fourth_digit
+   Definitions
+      At line 335 in file lab6.s
+   Uses
+      At line 291 in file lab6.s
+Comment: fourth_digit used once
+function_seg 00000194
+
+Symbol: function_seg
+   Definitions
+      At line 51 in file lab6.s
+   Uses
+      None
+Comment: function_seg unused
+interrupt_init 000001B8
+
+Symbol: interrupt_init
+   Definitions
+      At line 68 in file lab6.s
+   Uses
+      At line 4 in file lab6.s
+      At line 47 in file lab6.s
+
+interrupts 00000000
+
+Symbol: interrupts
+   Definitions
+      At line 1 in file lab6.s
+   Uses
+      None
+Comment: interrupts unused
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+invalid 0000012D
+
+Symbol: invalid
+   Definitions
+      At line 32 in file lab6.s
+   Uses
+      At line 262 in file lab6.s
+Comment: invalid used once
+invalid_case 00000378
+
+Symbol: invalid_case
+   Definitions
+      At line 258 in file lab6.s
+   Uses
+      At line 218 in file lab6.s
+      At line 224 in file lab6.s
+      At line 229 in file lab6.s
+
+lab6 0000017C
+
+Symbol: lab6
+   Definitions
+      At line 39 in file lab6.s
+   Uses
+      At line 2 in file lab6.s
+Comment: lab6 used once
+loop_begin 000001B4
+
+Symbol: loop_begin
+   Definitions
+      At line 62 in file lab6.s
+   Uses
+      At line 63 in file lab6.s
+Comment: loop_begin used once
+menu_exit 00000490
+
+Symbol: menu_exit
+   Definitions
+      At line 384 in file lab6.s
+   Uses
+      At line 212 in file lab6.s
+Comment: menu_exit used once
+move_string 00000454
+
+Symbol: move_string
+   Definitions
+      At line 359 in file lab6.s
+   Uses
+      At line 253 in file lab6.s
+Comment: move_string used once
+not_firsttime 0000035C
+
+Symbol: not_firsttime
+   Definitions
+      At line 247 in file lab6.s
+   Uses
+      At line 242 in file lab6.s
+      At line 244 in file lab6.s
+
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Relocatable symbols
+
+prompt 00000000
+
+Symbol: prompt
+   Definitions
+      At line 23 in file lab6.s
+   Uses
+      None
+Comment: prompt unused
+push_case 000002A4
+
+Symbol: push_case
+   Definitions
+      At line 159 in file lab6.s
+   Uses
+      At line 143 in file lab6.s
+Comment: push_case used once
+second_digit 000003E0
+
+Symbol: second_digit
+   Definitions
+      At line 307 in file lab6.s
+   Uses
+      At line 285 in file lab6.s
+Comment: second_digit used once
+seg1 0000003A
+
+Symbol: seg1
+   Definitions
+      At line 29 in file lab6.s
+   Uses
+      At line 52 in file lab6.s
+Comment: seg1 used once
+seg2 000000C6
+
+Symbol: seg2
+   Definitions
+      At line 30 in file lab6.s
+   Uses
+      At line 54 in file lab6.s
+Comment: seg2 used once
+seg3 00000105
+
+Symbol: seg3
+   Definitions
+      At line 31 in file lab6.s
+   Uses
+      At line 56 in file lab6.s
+Comment: seg3 used once
+storebuffer1 00000026
+
+Symbol: storebuffer1
+   Definitions
+      At line 25 in file lab6.s
+   Uses
+      At line 60 in file lab6.s
+      At line 254 in file lab6.s
+      At line 260 in file lab6.s
+      At line 365 in file lab6.s
+      At line 377 in file lab6.s
+
+
+
+ARM Macro Assembler    Page 5 Alphabetic symbol ordering
+Relocatable symbols
+
+
+strobing 00000394
+
+Symbol: strobing
+   Definitions
+      At line 274 in file lab6.s
+   Uses
+      At line 189 in file lab6.s
+Comment: strobing used once
+strobing_exit 0000044C
+
+Symbol: strobing_exit
+   Definitions
+      At line 350 in file lab6.s
+   Uses
+      At line 306 in file lab6.s
+      At line 320 in file lab6.s
+      At line 334 in file lab6.s
+      At line 348 in file lab6.s
+
+switch_loop 00000468
+
+Symbol: switch_loop
+   Definitions
+      At line 367 in file lab6.s
+   Uses
+      At line 375 in file lab6.s
+Comment: switch_loop used once
+third_digit 00000404
+
+Symbol: third_digit
+   Definitions
+      At line 321 in file lab6.s
+   Uses
+      At line 288 in file lab6.s
+Comment: third_digit used once
+timer0_case 000002DC
+
+Symbol: timer0_case
+   Definitions
+      At line 185 in file lab6.s
+   Uses
+      At line 157 in file lab6.s
+Comment: timer0_case used once
+timerbuffer 00000012
+
+Symbol: timerbuffer
+   Definitions
+      At line 24 in file lab6.s
+   Uses
+      At line 59 in file lab6.s
+      At line 239 in file lab6.s
+      At line 346 in file lab6.s
+      At line 362 in file lab6.s
+      At line 364 in file lab6.s
+
+uart0_case 000002C0
+
+Symbol: uart0_case
+
+
+
+ARM Macro Assembler    Page 6 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 171 in file lab6.s
+   Uses
+      At line 150 in file lab6.s
+Comment: uart0_case used once
+uart0_comparisons 000002FC
+
+Symbol: uart0_comparisons
+   Definitions
+      At line 203 in file lab6.s
+   Uses
+      At line 179 in file lab6.s
+Comment: uart0_comparisons used once
+valid_number 00000338
+
+Symbol: valid_number
+   Definitions
+      At line 231 in file lab6.s
+   Uses
+      At line 221 in file lab6.s
+      At line 227 in file lab6.s
+
+37 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+EXTINT E01FC140
+
+Symbol: EXTINT
+   Definitions
+      At line 17 in file lab6.s
+   Uses
+      None
+Comment: EXTINT unused
+IO0DIR E0028008
+
+Symbol: IO0DIR
+   Definitions
+      At line 14 in file lab6.s
+   Uses
+      At line 279 in file lab6.s
+Comment: IO0DIR used once
+MR1 E000401C
+
+Symbol: MR1
+   Definitions
+      At line 19 in file lab6.s
+   Uses
+      At line 107 in file lab6.s
+Comment: MR1 used once
+T0IR E0004000
+
+Symbol: T0IR
+   Definitions
+      At line 21 in file lab6.s
+   Uses
+      At line 153 in file lab6.s
+Comment: T0IR used once
+T0MCR E0004014
+
+Symbol: T0MCR
+   Definitions
+      At line 20 in file lab6.s
+   Uses
+      At line 110 in file lab6.s
+Comment: T0MCR used once
+T0TCR E0004004
+
+Symbol: T0TCR
+   Definitions
+      At line 18 in file lab6.s
+   Uses
+      At line 100 in file lab6.s
+Comment: T0TCR used once
+U0IER E000C004
+
+Symbol: U0IER
+   Definitions
+      At line 16 in file lab6.s
+   Uses
+      At line 94 in file lab6.s
+Comment: U0IER used once
+U0IIR E000C008
+
+Symbol: U0IIR
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Absolute symbols
+
+   Definitions
+      At line 15 in file lab6.s
+   Uses
+      At line 146 in file lab6.s
+Comment: U0IIR used once
+8 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+clear_string 00000000
+
+Symbol: clear_string
+   Definitions
+      At line 11 in file lab6.s
+   Uses
+      At line 261 in file lab6.s
+      At line 363 in file lab6.s
+      At line 378 in file lab6.s
+
+display_digit_on_7_seg 00000000
+
+Symbol: display_digit_on_7_seg
+   Definitions
+      At line 10 in file lab6.s
+   Uses
+      At line 301 in file lab6.s
+      At line 315 in file lab6.s
+      At line 329 in file lab6.s
+      At line 343 in file lab6.s
+      At line 391 in file lab6.s
+
+output_character 00000000
+
+Symbol: output_character
+   Definitions
+      At line 9 in file lab6.s
+   Uses
+      At line 177 in file lab6.s
+      At line 252 in file lab6.s
+
+output_string 00000000
+
+Symbol: output_string
+   Definitions
+      At line 6 in file lab6.s
+   Uses
+      At line 53 in file lab6.s
+      At line 55 in file lab6.s
+      At line 57 in file lab6.s
+      At line 263 in file lab6.s
+      At line 386 in file lab6.s
+
+read_character 00000000
+
+Symbol: read_character
+   Definitions
+      At line 8 in file lab6.s
+   Uses
+      None
+Comment: read_character unused
+read_string 00000000
+
+Symbol: read_string
+   Definitions
+      At line 7 in file lab6.s
+   Uses
+      None
+Comment: read_string unused
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+External symbols
+
+setup 00000000
+
+Symbol: setup
+   Definitions
+      At line 5 in file lab6.s
+   Uses
+      At line 45 in file lab6.s
+Comment: setup used once
+uart_init 00000000
+
+Symbol: uart_init
+   Definitions
+      At line 12 in file lab6.s
+   Uses
+      At line 46 in file lab6.s
+Comment: uart_init used once
+8 symbols
+387 symbols in table
