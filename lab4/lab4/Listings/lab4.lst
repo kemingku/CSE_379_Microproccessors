@@ -1,0 +1,1341 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             GPIO, CODE, READWRITE
+    2 00000000                 EXPORT           lab4
+    3 00000000                 EXTERN           output_string
+    4 00000000                 EXTERN           read_string
+    5 00000000                 EXTERN           illuminate_led
+    6 00000000                 EXTERN           read_character
+    7 00000000                 EXTERN           output_character
+    8 00000000                 EXTERN           read_from_push_btns
+    9 00000000                 EXTERN           convert_to_string
+   10 00000000                 EXTERN           display_digit_on_7_seg
+   11 00000000                 EXTERN           illuminate_RGB_LED
+   12 00000000         
+   13 00000000 00000008 
+                       PIODATA EQU              0x8         ; Offset to paralle
+                                                            l I/O data register
+                                                            
+   14 00000000 E0028018 
+                       IO1DIR  EQU              0xE0028018
+   15 00000000 E0028010 
+                       IO1PIN  EQU              0xE0028010
+   16 00000000 E002801C 
+                       IO1CLR  EQU              0xE002801C
+   17 00000000 E0028014 
+                       IO1SET  EQU              0xE0028014
+   18 00000000 E0028008 
+                       IO0DIR  EQU              0xE0028008
+   19 00000000 E0028000 
+                       IO0SET  EQU              0xE0028000
+   20 00000000 E002800C 
+                       IO0CLR  EQU              0xE002800C
+   21 00000000 E002C000 
+                       PINSEL0 EQU              0xE002C000
+   22 00000000         
+   23 00000000         ;Digits
+   24 00000000 00008000 
+                       Hex_g   EQU              0x8000
+   25 00000000         
+   26 00000000 00260000 
+                       RGB_white
+                               EQU              0x260000
+   27 00000000         ;Menu strings
+   28 00000000 0C 57 65 
+              6C 63 6F 
+              6D 65 20 
+              74 6F 20 
+              6C 61 62 
+              20 23 34 
+              20 20 00 prompt  =                "\fWelcome to lab #4  ",0
+   29 00000015 0A 0D 50 
+              72 65 73 
+              73 20 31 
+              20 74 6F 
+              20 69 6C 
+              6C 75 6D 
+              69 6E 61 
+              74 65 20 
+              6C 65 64 
+              2E 00    prompt1 =                "\n\rPress 1 to illuminate led.
+",0 
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+                                                            ; Text to be sent t
+                                                            o PuTTy
+   30 00000032 0A 0D 50 
+              72 65 73 
+              73 20 32 
+              20 74 6F 
+              20 72 65 
+              61 64 20 
+              66 72 6F 
+              6D 20 70 
+              75 73 68 
+              20 62 75 
+              74 74 6F 
+              6E 73 2E 
+              00       prompt2 =                "\n\rPress 2 to read from push 
+buttons.",0
+   31 00000057 0A 0D 50 
+              72 65 73 
+              73 20 33 
+              20 74 6F 
+              20 70 6C 
+              61 79 20 
+              77 69 74 
+              68 20 74 
+              68 65 20 
+              37 20 73 
+              65 67 6D 
+              65 6E 74 
+              20 64 69 
+              73 70 6C 
+              61 79 2E 
+              00       prompt3 =                "\n\rPress 3 to play with the 7
+ segment display.",0
+   32 00000085 0A 0D 50 
+              72 65 73 
+              73 20 34 
+              20 74 6F 
+              20 63 68 
+              61 6E 67 
+              65 20 74 
+              68 65 20 
+              52 47 42 
+              20 4C 45 
+              44 20 63 
+              6F 6C 6F 
+              72 2E 00 prompt4 =                "\n\rPress 4 to change the RGB 
+LED color.",0
+   33 000000AC 0A 0D 50 
+              72 65 73 
+              73 20 71 
+              20 74 6F 
+              20 65 6E 
+              64 20 74 
+              68 65 20 
+              70 72 6F 
+              67 72 61 
+              6D 2E 0A 
+              0D 00    promptq =                "\n\rPress q to end the program
+.\n\r",0
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+   34 000000CC 00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 5C 30 
+              00 00 00 
+              00 00 00 
+              00 00 5C 
+              30 00 00 
+              00 00 00 
+              00 00 00 
+              5C 30 00 
+              00 00 00 
+              00 00 00 
+              00 5C 30 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00       buffer  =                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0\\0\0\0\0\0\0\0\0\0\\0\0\0\0\0\0\0\0\0\\0\0\0\0\0\0\0\0\0\\0\0\0\0\0\0\
+0\0\0\0", 0
+   35 00000109         ;///////////////////////////////////////////////////////
+                       //////////////////
+   36 00000109         ;function 1 strings
+   37 00000109         
+   38 00000109 0C 0A 0D 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              20 20 20 
+              57 65 20 
+              61 72 65 
+              20 64 6F 
+              6E 65 20 
+              42 6F 79 
+              79 79 79 
+              79 79 00 exit    =                "\f\n\r                  We are
+ done Boyyyyyy",0
+   39 00000133         
+   40 00000133         ;///////////////////////////////////////////////////////
+                       //////////////////
+   41 00000133         ;function 1 strings
+   42 00000133 0C 45 6E 
+              74 65 72 
+              20 61 20 
+              63 68 61 
+              72 61 63 
+              74 65 72 
+              20 66 72 
+              6F 6D 20 
+              30 2D 39 
+              20 41 2D 
+              46 2E 20 
+              0A 0D 0A 
+              0D 20 20 
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+              20 20 20 
+              20 49 6E 
+              20 75 70 
+              70 65 72 
+              63 61 73 
+              65 20 77 
+              69 74 68 
+              20 41 20 
+              72 65 70 
+              72 65 73 
+              65 6E 74 
+              69 6E 67 
+              20 31 30 
+              20 61 6E 
+              64 20 46 
+              20 72 65 
+              70 72 65 
+              73 65 6E 
+              74 69 6E 
+              67 20 31 
+              35 20 72 
+              65 73 70 
+              65 63 74 
+              69 76 65 
+              6C 79 2E 
+              0A 0D 00 led1    =                "\fEnter a character from 0-9 A
+-F. \n\r\n\r      In uppercase with A representing 10 and F representing 15 res
+pectively.\n\r", 0
+   43 000001A8 0A 0D 20 
+              20 20 20 
+              20 20 54 
+              68 65 20 
+              6E 75 6D 
+              62 65 72 
+              20 77 69 
+              6C 6C 20 
+              74 75 72 
+              6E 20 74 
+              68 65 20 
+              4C 45 44 
+              20 6C 69 
+              67 68 74 
+              73 20 6F 
+              6E 20 69 
+              6E 20 69 
+              74 73 20 
+              62 69 6E 
+              61 72 79 
+              20 76 61 
+              6C 75 65 
+              2E 0A 0D 
+              0A 0D 20 
+              20 20 20 
+              20 20 41 
+              20 6C 69 
+              74 20 6C 
+              65 64 20 
+              72 65 70 
+              72 65 73 
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+              65 6E 74 
+              73 20 61 
+              20 31 20 
+              61 6E 64 
+              20 6F 66 
+              66 20 72 
+              65 70 72 
+              65 73 65 
+              6E 74 73 
+              20 30 2E 
+              00       led2    =                "\n\r      The number will turn
+ the LED lights on in its binary value.\n\r\n\r      A lit led represents a 1 a
+nd off represents 0.", 0
+   44 00000224 0A 0D 0A 
+              0D 50 72 
+              65 73 73 
+              20 71 20 
+              74 6F 20 
+              72 65 74 
+              75 72 6E 
+              20 74 6F 
+              20 6D 61 
+              69 6E 20 
+              6D 65 6E 
+              75 2E 0A 
+              0D 0A 0D 
+              00       led3    =                "\n\r\n\rPress q to return to m
+ain menu.\n\r\n\r", 0
+   45 0000024C         ;///////////////////////////////////////////////////////
+                       //////////////////
+   46 0000024C         ;function 2 strings
+   47 0000024C 0C 48 6F 
+              6C 64 20 
+              74 68 65 
+              20 6D 6F 
+              6D 65 6E 
+              74 61 72 
+              79 20 70 
+              75 73 68 
+              20 62 75 
+              74 74 6F 
+              6E 73 20 
+              79 6F 75 
+              20 77 61 
+              6E 74 20 
+              70 72 65 
+              73 73 65 
+              64 20 62 
+              65 66 6F 
+              72 65 20 
+              65 6E 74 
+              65 72 69 
+              6E 67 20 
+              63 68 61 
+              72 61 63 
+              74 65 72 
+              20 27 61 
+              27 0A 0D 
+              74 6F 20 
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+              64 69 73 
+              70 6C 61 
+              79 20 69 
+              74 73 20 
+              64 65 63 
+              69 6D 61 
+              6C 20 76 
+              61 6C 75 
+              65 20 6F 
+              6E 20 70 
+              75 74 74 
+              79 2E 0A 
+              0D 54 68 
+              65 20 64 
+              65 63 69 
+              6D 61 6C 
+              20 76 61 
+              6C 75 65 
+              20 69 73 
+              3A 20 00 push1   =                "\fHold the momentary push butt
+ons you want pressed before entering character 'a'\n\rto display its decimal va
+lue on putty.\n\rThe decimal value is: ", 0
+   48 000002DC 0A 0D 0A 
+              0D 50 72 
+              65 73 73 
+              20 61 6E 
+              79 20 6B 
+              65 79 20 
+              74 6F 20 
+              72 75 6E 
+              20 69 74 
+              20 61 67 
+              61 69 6E 
+              2E 0A 0D 
+              50 72 65 
+              73 73 20 
+              27 71 27 
+              20 74 6F 
+              20 67 6F 
+              20 62 61 
+              63 6B 20 
+              74 6F 20 
+              6D 61 69 
+              6E 20 6D 
+              65 6E 75 
+              2E 20 0A 
+              0D 0A 0D 
+              00       push2   =                "\n\r\n\rPress any key to run i
+t again.\n\rPress 'q' to go back to main menu. \n\r\n\r", 0
+   49 00000328         
+   50 00000328         ;///////////////////////////////////////////////////////
+                       //////////////////
+   51 00000328         ;function 3 strings
+   52 00000328 0C 45 6E 
+              74 65 72 
+              20 61 20 
+              63 68 61 
+              72 61 63 
+              74 65 72 
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+              20 66 72 
+              6F 6D 20 
+              30 2D 39 
+              20 41 2D 
+              46 2E 20 
+              0A 0D 0A 
+              0D 20 20 
+              20 20 20 
+              20 49 6E 
+              20 75 70 
+              70 65 72 
+              63 61 73 
+              65 20 77 
+              69 74 68 
+              20 41 20 
+              72 65 70 
+              72 65 73 
+              65 6E 74 
+              69 6E 67 
+              20 31 30 
+              20 61 6E 
+              64 20 46 
+              20 72 65 
+              70 72 65 
+              73 65 6E 
+              74 69 6E 
+              67 20 31 
+              35 20 72 
+              65 73 70 
+              65 63 74 
+              69 76 65 
+              6C 79 2E 
+              0A 0D 00 seg1    =                "\fEnter a character from 0-9 A
+-F. \n\r\n\r      In uppercase with A representing 10 and F representing 15 res
+pectively.\n\r", 0
+   53 0000039D 0A 0D 20 
+              20 20 20 
+              20 20 54 
+              68 65 20 
+              6E 75 6D 
+              62 65 72 
+              20 77 69 
+              6C 6C 20 
+              62 65 20 
+              64 69 73 
+              70 6C 61 
+              79 65 64 
+              20 6F 6E 
+              20 74 68 
+              65 20 73 
+              65 76 65 
+              6E 20 73 
+              65 67 6D 
+              65 6E 74 
+              20 64 69 
+              73 70 6C 
+              61 79 20 
+              61 73 20 
+              68 65 78 
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+              61 64 65 
+              63 69 6D 
+              61 6C 2E 
+              0A 0D 00 seg2    =                "\n\r      The number will be d
+isplayed on the seven segment display as hexadecimal.\n\r", 0
+   54 000003F1 0A 0D 0A 
+              0D 50 72 
+              65 73 73 
+              20 71 20 
+              74 6F 20 
+              72 65 74 
+              75 72 6E 
+              20 74 6F 
+              20 6D 61 
+              69 6E 20 
+              6D 65 6E 
+              75 2E 0A 
+              0D 0A 0D 
+              00       seg3    =                "\n\r\n\rPress q to return to m
+ain menu.\n\r\n\r", 0
+   55 00000419         
+   56 00000419         ;///////////////////////////////////////////////////////
+                       //////////////////
+   57 00000419         ;function 4 strings
+   58 00000419 0C 45 6E 
+              74 65 72 
+              20 61 20 
+              63 68 61 
+              72 61 63 
+              74 65 72 
+              20 66 72 
+              6F 6D 20 
+              31 2D 37 
+              20 74 6F 
+              20 63 68 
+              61 6E 67 
+              65 20 52 
+              47 42 20 
+              4C 45 44 
+              20 63 6F 
+              6C 6F 72 
+              0A 0D 0A 
+              0D 20 20 
+              20 20 20 
+              20 31 20 
+              3D 20 52 
+              65 64 0A 
+              0D 20 20 
+              20 20 20 
+              20 32 20 
+              3D 20 62 
+              6C 75 65 
+              0A 0D 20 
+              20 20 20 
+              20 20 33 
+              20 3D 20 
+              67 72 65 
+              65 6E 2E 
+              0A 0D 20 
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+              20 20 20 
+              20 20 34 
+              20 3D 20 
+              79 65 6C 
+              6C 6F 77 
+              0A 0D 00 rgb1    =                "\fEnter a character from 1-7 t
+o change RGB LED color\n\r\n\r      1 = Red\n\r      2 = blue\n\r      3 = gree
+n.\n\r      4 = yellow\n\r", 0
+   59 00000494 20 20 20 
+              20 20 20 
+              35 20 3D 
+              20 70 75 
+              72 70 6C 
+              65 0A 0D 
+              20 20 20 
+              20 20 20 
+              36 20 3D 
+              20 63 79 
+              61 6E 0A 
+              0D 20 20 
+              20 20 20 
+              20 37 20 
+              3D 20 77 
+              68 69 74 
+              65 0A 0D 
+              00       rgb2    =                "      5 = purple\n\r      6 = 
+cyan\n\r      7 = white\n\r", 0
+   60 000004C8 0A 0D 0A 
+              0D 50 72 
+              65 73 73 
+              20 71 20 
+              74 6F 20 
+              72 65 74 
+              75 72 6E 
+              20 74 6F 
+              20 6D 61 
+              69 6E 20 
+              6D 65 6E 
+              75 2E 0A 
+              0D 0A 0D 
+              00       rgb3    =                "\n\r\n\rPress q to return to m
+ain menu.\n\r\n\r", 0
+   61 000004F0         
+   62 000004F0                 ALIGN
+   63 000004F0         digits_SET
+   64 000004F0 00003780        DCD              0x00003780  ; 0
+   65 000004F4 00000300        DCD              0x00000300  ; 1 
+   66 000004F8         ; Place other display values here
+   67 000004F8 00003880        DCD              0x00003880  ; F
+   68 000004FC         
+   69 000004FC                 ALIGN
+   70 000004FC         lab4
+   71 000004FC E92D4000        STMFD            SP!,{lr}    ; Store register lr
+                                                             on stack
+   72 00000500         
+   73 00000500 EB000043        BL               setup
+   74 00000504         
+   75 00000504         menu_begin
+   76 00000504         ;Prints out the strings that holds instructions for the 
+
+
+
+ARM Macro Assembler    Page 10 
+
+
+                       menu
+   77 00000504 E59F4154        LDR              r4, =prompt
+   78 00000508 EBFFFFFE        BL               output_string
+   79 0000050C E59F4150        LDR              r4, =prompt1
+   80 00000510 EBFFFFFE        BL               output_string
+   81 00000514 E59F414C        LDR              r4, =prompt2
+   82 00000518 EBFFFFFE        BL               output_string
+   83 0000051C E59F4148        LDR              r4, =prompt3
+   84 00000520 EBFFFFFE        BL               output_string
+   85 00000524 E59F4144        LDR              r4, =prompt4
+   86 00000528 EBFFFFFE        BL               output_string
+   87 0000052C E59F4140        LDR              r4, =promptq
+   88 00000530 EBFFFFFE        BL               output_string
+   89 00000534         ; end of printing instruction
+   90 00000534         
+   91 00000534 EBFFFFFE        BL               read_character ;reads a charact
+                                                            er from putty the b
+                                                            ranches to correspo
+                                                            nding functionality
+                                                             associated with # 
+                                                            1-4
+   92 00000538 E3500071        CMP              r0, #0x71   ;Reading in 'q' end
+                                                            s the whole program
+                                                            
+   93 0000053C 0A000043        BEQ              menu_exit
+   94 00000540         
+   95 00000540 E3500031        CMP              r0, #0x31   ;If 1 is read branc
+                                                            h to function led
+   96 00000544 0A000006        BEQ              function_led
+   97 00000548         
+   98 00000548 E3500032        CMP              r0, #0x32   ;If 2 is read branc
+                                                            h to function push 
+                                                            button
+   99 0000054C 0A000010        BEQ              function_push
+  100 00000550         
+  101 00000550 E3500033        CMP              r0, #0x33   ;If 3 is read branc
+                                                            h to function 7 seg
+                                                            ment
+  102 00000554 0A000017        BEQ              function_seg
+  103 00000558         
+  104 00000558 E3500034        CMP              r0, #0x34   ;If 4 is read branc
+                                                            h to function RGB L
+                                                            ED
+  105 0000055C 0A000021        BEQ              function_RGB
+  106 00000560         
+  107 00000560 EAFFFFE7        B                menu_begin  ;If anything else i
+                                                            s read branches bac
+                                                            k to main menu 
+  108 00000564         
+  109 00000564         ;///////////////////////////////////////////////////////
+                       /
+  110 00000564         function_led
+  111 00000564         
+  112 00000564         ;Prints out strings associated with instructions on how 
+                       to use illuminate_led
+  113 00000564 E59F410C        LDR              r4, =led1
+  114 00000568 EBFFFFFE        BL               output_string
+  115 0000056C E59F4108        LDR              r4, =led2
+  116 00000570 EBFFFFFE        BL               output_string
+
+
+
+ARM Macro Assembler    Page 11 
+
+
+  117 00000574 E59F4104        LDR              r4, =led3
+  118 00000578 EBFFFFFE        BL               output_string
+  119 0000057C         ;end of printing string
+  120 0000057C         
+  121 0000057C EBFFFFFE        BL               read_character ;reads a charact
+                                                            er from putty to de
+                                                            termine whether to 
+                                                            branch back to main
+                                                             menu
+  122 00000580 E3500071        CMP              r0, #0x71   ;Branches back to m
+                                                            ain menu if 'q' is 
+                                                            read
+  123 00000584 0AFFFFDE        BEQ              menu_begin
+  124 00000588         
+  125 00000588 EBFFFFFE        BL               output_character
+  126 0000058C EBFFFFFE        BL               illuminate_led ;Otherwise run i
+                                                            lluminate led
+  127 00000590         
+  128 00000590 EAFFFFF3        B                function_led ;repeatedly run th
+                                                            is functionality un
+                                                            til q is read
+  129 00000594         
+  130 00000594         ;///////////////////////////////////////////////////////
+                       / 
+  131 00000594         function_push
+  132 00000594         
+  133 00000594         ;Prints out strings associated with instructions on how 
+                       to use read_from_push_btns
+  134 00000594 E59F40E8        LDR              r4, =push1
+  135 00000598 EBFFFFFE        BL               output_string ;Printing out str
+                                                            ing for instruction
+                                                            s
+  136 0000059C         ;
+  137 0000059C         
+  138 0000059C EBFFFFFE        BL               read_from_push_btns ;push butto
+                                                            m function
+  139 000005A0         
+  140 000005A0 E59F40E0        LDR              r4, =push2
+  141 000005A4 EBFFFFFE        BL               output_string ;prints string on
+                                                             how and run this f
+                                                            unctionality again
+  142 000005A8         
+  143 000005A8 EBFFFFFE        BL               read_character ;reads character
+                                                             from putty 
+  144 000005AC E3500071        CMP              r0, #0x71   ;if 'q' is read bra
+                                                            nches back to main 
+                                                            menu
+  145 000005B0 0AFFFFD3        BEQ              menu_begin
+  146 000005B4         
+  147 000005B4 EAFFFFF6        B                function_push
+  148 000005B8         
+  149 000005B8         ;///////////////////////////////////////////////////////
+                       / 
+  150 000005B8         function_seg
+  151 000005B8         
+  152 000005B8         ;This block prints instructions for the display digit on
+                        7 seg subroutine
+  153 000005B8 E59F40CC        LDR              r4, =seg1
+  154 000005BC EBFFFFFE        BL               output_string
+
+
+
+ARM Macro Assembler    Page 12 
+
+
+  155 000005C0 E59F40C8        LDR              r4, =seg2
+  156 000005C4 EBFFFFFE        BL               output_string
+  157 000005C8 E59F40C4        LDR              r4, =seg3
+  158 000005CC EBFFFFFE        BL               output_string
+  159 000005D0         ;
+  160 000005D0         
+  161 000005D0 EBFFFFFE        BL               read_character ;reads character
+                                                             to be used for dis
+                                                            play on 7 seg
+  162 000005D4 E3500071        CMP              r0, #0x71   ;if 'q' is read bra
+                                                            nches back to main 
+                                                            menu
+  163 000005D8 0AFFFFC9        BEQ              menu_begin
+  164 000005DC         
+  165 000005DC EBFFFFFE        BL               output_character ;echos charact
+                                                            er back 
+  166 000005E0         
+  167 000005E0 EBFFFFFE        BL               display_digit_on_7_seg
+  168 000005E4         
+  169 000005E4 EAFFFFF3        B                function_seg ;branches back to 
+                                                            this functionality 
+                                                            to run again
+  170 000005E8         
+  171 000005E8         function_RGB
+  172 000005E8         
+  173 000005E8         ;This block prints instructions on how to use the subrou
+                       tine illuminate RGB LED 
+  174 000005E8 E59F40A8        LDR              r4, =rgb1
+  175 000005EC EBFFFFFE        BL               output_string
+  176 000005F0 E59F40A4        LDR              r4, =rgb2
+  177 000005F4 EBFFFFFE        BL               output_string
+  178 000005F8 E59F40A0        LDR              r4, =rgb3
+  179 000005FC EBFFFFFE        BL               output_string
+  180 00000600         ;
+  181 00000600         
+  182 00000600 EBFFFFFE        BL               read_character ;reads in charac
+                                                            ter to be used for 
+                                                            illuminate RGB LED 
+                                                            or to end this func
+                                                            tionality 
+  183 00000604 E3500071        CMP              r0, #0x71   ;reading in 'q' end
+                                                            s this functionalit
+                                                            y and branches back
+                                                             to the main menu
+  184 00000608 0AFFFFBD        BEQ              menu_begin
+  185 0000060C         
+  186 0000060C EBFFFFFE        BL               illuminate_RGB_LED
+  187 00000610         
+  188 00000610 EAFFFFF4        B                function_RGB ;branches back to 
+                                                            this functionality 
+                                                            to do this subrouti
+                                                            ne again
+  189 00000614         
+  190 00000614         
+  191 00000614         ;///////////////////////////////////////////////////////
+                       //////////////// 
+  192 00000614         setup
+  193 00000614         ;This subroutine sets up IO0DIR and IO1DIR for illuminat
+                       e led, read from push buttons, display on 7 segment, and
+
+
+
+ARM Macro Assembler    Page 13 
+
+
+                        RGB LED
+  194 00000614         ;Also sets the board to its beginning state. 
+  195 00000614         
+  196 00000614 E92D4001        STMFD            sp!,{r0,lr}
+  197 00000618         
+  198 00000618 E59F1084        LDR              r1, =IO0DIR
+  199 0000061C E59F2084        LDR              r2, =0x26B7A0
+  200 00000620 E5812000        STR              r2, [r1]    ;sets up the IO0DIR
+                                                             
+  201 00000624 E59F1080        LDR              r1, =IO1DIR
+  202 00000628 E3A0280F        LDR              r2, =0xF0000
+  203 0000062C E5812000        STR              r2, [r1]    ;sets up IO1DIR
+  204 00000630         
+  205 00000630         
+  206 00000630 E3A00046        MOV              r0, #70
+  207 00000634 EBFFFFFE        BL               illuminate_led ;Turns all led o
+                                                            n this is the begin
+                                                            ning state 
+  208 00000638 E3A00037        MOV              r0, #55
+  209 0000063C EBFFFFFE        BL               illuminate_RGB_LED ;Turns on RG
+                                                            B LED to white 
+  210 00000640 E3A00047        MOV              r0, #71
+  211 00000644 EBFFFFFE        BL               display_digit_on_7_seg ;Turns o
+                                                            n only the G segmen
+                                                            t of the 7 segment 
+                                                            display 
+  212 00000648         
+  213 00000648 E8BD4001        LDMFD            sp!,{r0,lr}
+  214 0000064C E12FFF1E        BX               lr
+  215 00000650         ;///////////////////////////////////////////////////////
+                       ////////////////
+  216 00000650         menu_exit
+  217 00000650 E59F4058        LDR              r4, =exit
+  218 00000654 EBFFFFFE        BL               output_string
+  219 00000658         
+  220 00000658 E8BD4000        LDMFD            SP!, {lr}   ; Restore register 
+                                                            lr from stack 
+  221 0000065C E12FFF1E        BX               LR
+  222 00000660         
+  223 00000660         
+  224 00000660                 END
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              E0028008 
+
+
+
+ARM Macro Assembler    Page 14 
+
+
+              0026B7A0 
+              E0028018 
+              00000000 
+Command Line: --debug --xref --diag_suppress=9931 --apcs=interwork --depend=.\o
+bjects\lab4.d -o.\objects\lab4.o -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v5\ARM\CMS
+IS\Include -IC:\Keil_v5\ARM\INC\Philips --predefine="__EVAL SETA 1" --predefine
+="__UVISION_VERSION SETA 524" --list=.\listings\lab4.lst lab4.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+GPIO 00000000
+
+Symbol: GPIO
+   Definitions
+      At line 1 in file lab4.s
+   Uses
+      None
+Comment: GPIO unused
+buffer 000000CC
+
+Symbol: buffer
+   Definitions
+      At line 34 in file lab4.s
+   Uses
+      None
+Comment: buffer unused
+digits_SET 000004F0
+
+Symbol: digits_SET
+   Definitions
+      At line 63 in file lab4.s
+   Uses
+      None
+Comment: digits_SET unused
+exit 00000109
+
+Symbol: exit
+   Definitions
+      At line 38 in file lab4.s
+   Uses
+      At line 217 in file lab4.s
+Comment: exit used once
+function_RGB 000005E8
+
+Symbol: function_RGB
+   Definitions
+      At line 171 in file lab4.s
+   Uses
+      At line 105 in file lab4.s
+      At line 188 in file lab4.s
+
+function_led 00000564
+
+Symbol: function_led
+   Definitions
+      At line 110 in file lab4.s
+   Uses
+      At line 96 in file lab4.s
+      At line 128 in file lab4.s
+
+function_push 00000594
+
+Symbol: function_push
+   Definitions
+      At line 131 in file lab4.s
+   Uses
+      At line 99 in file lab4.s
+      At line 147 in file lab4.s
+
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+function_seg 000005B8
+
+Symbol: function_seg
+   Definitions
+      At line 150 in file lab4.s
+   Uses
+      At line 102 in file lab4.s
+      At line 169 in file lab4.s
+
+lab4 000004FC
+
+Symbol: lab4
+   Definitions
+      At line 70 in file lab4.s
+   Uses
+      At line 2 in file lab4.s
+Comment: lab4 used once
+led1 00000133
+
+Symbol: led1
+   Definitions
+      At line 42 in file lab4.s
+   Uses
+      At line 113 in file lab4.s
+Comment: led1 used once
+led2 000001A8
+
+Symbol: led2
+   Definitions
+      At line 43 in file lab4.s
+   Uses
+      At line 115 in file lab4.s
+Comment: led2 used once
+led3 00000224
+
+Symbol: led3
+   Definitions
+      At line 44 in file lab4.s
+   Uses
+      At line 117 in file lab4.s
+Comment: led3 used once
+menu_begin 00000504
+
+Symbol: menu_begin
+   Definitions
+      At line 75 in file lab4.s
+   Uses
+      At line 107 in file lab4.s
+      At line 123 in file lab4.s
+      At line 145 in file lab4.s
+      At line 163 in file lab4.s
+      At line 184 in file lab4.s
+
+menu_exit 00000650
+
+Symbol: menu_exit
+   Definitions
+      At line 216 in file lab4.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 93 in file lab4.s
+Comment: menu_exit used once
+prompt 00000000
+
+Symbol: prompt
+   Definitions
+      At line 28 in file lab4.s
+   Uses
+      At line 77 in file lab4.s
+Comment: prompt used once
+prompt1 00000015
+
+Symbol: prompt1
+   Definitions
+      At line 29 in file lab4.s
+   Uses
+      At line 79 in file lab4.s
+Comment: prompt1 used once
+prompt2 00000032
+
+Symbol: prompt2
+   Definitions
+      At line 30 in file lab4.s
+   Uses
+      At line 81 in file lab4.s
+Comment: prompt2 used once
+prompt3 00000057
+
+Symbol: prompt3
+   Definitions
+      At line 31 in file lab4.s
+   Uses
+      At line 83 in file lab4.s
+Comment: prompt3 used once
+prompt4 00000085
+
+Symbol: prompt4
+   Definitions
+      At line 32 in file lab4.s
+   Uses
+      At line 85 in file lab4.s
+Comment: prompt4 used once
+promptq 000000AC
+
+Symbol: promptq
+   Definitions
+      At line 33 in file lab4.s
+   Uses
+      At line 87 in file lab4.s
+Comment: promptq used once
+push1 0000024C
+
+Symbol: push1
+   Definitions
+      At line 47 in file lab4.s
+   Uses
+      At line 134 in file lab4.s
+Comment: push1 used once
+push2 000002DC
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Relocatable symbols
+
+
+Symbol: push2
+   Definitions
+      At line 48 in file lab4.s
+   Uses
+      At line 140 in file lab4.s
+Comment: push2 used once
+rgb1 00000419
+
+Symbol: rgb1
+   Definitions
+      At line 58 in file lab4.s
+   Uses
+      At line 174 in file lab4.s
+Comment: rgb1 used once
+rgb2 00000494
+
+Symbol: rgb2
+   Definitions
+      At line 59 in file lab4.s
+   Uses
+      At line 176 in file lab4.s
+Comment: rgb2 used once
+rgb3 000004C8
+
+Symbol: rgb3
+   Definitions
+      At line 60 in file lab4.s
+   Uses
+      At line 178 in file lab4.s
+Comment: rgb3 used once
+seg1 00000328
+
+Symbol: seg1
+   Definitions
+      At line 52 in file lab4.s
+   Uses
+      At line 153 in file lab4.s
+Comment: seg1 used once
+seg2 0000039D
+
+Symbol: seg2
+   Definitions
+      At line 53 in file lab4.s
+   Uses
+      At line 155 in file lab4.s
+Comment: seg2 used once
+seg3 000003F1
+
+Symbol: seg3
+   Definitions
+      At line 54 in file lab4.s
+   Uses
+      At line 157 in file lab4.s
+Comment: seg3 used once
+setup 00000614
+
+Symbol: setup
+   Definitions
+
+
+
+ARM Macro Assembler    Page 5 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 192 in file lab4.s
+   Uses
+      At line 73 in file lab4.s
+Comment: setup used once
+29 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+Hex_g 00008000
+
+Symbol: Hex_g
+   Definitions
+      At line 24 in file lab4.s
+   Uses
+      None
+Comment: Hex_g unused
+IO0CLR E002800C
+
+Symbol: IO0CLR
+   Definitions
+      At line 20 in file lab4.s
+   Uses
+      None
+Comment: IO0CLR unused
+IO0DIR E0028008
+
+Symbol: IO0DIR
+   Definitions
+      At line 18 in file lab4.s
+   Uses
+      At line 198 in file lab4.s
+Comment: IO0DIR used once
+IO0SET E0028000
+
+Symbol: IO0SET
+   Definitions
+      At line 19 in file lab4.s
+   Uses
+      None
+Comment: IO0SET unused
+IO1CLR E002801C
+
+Symbol: IO1CLR
+   Definitions
+      At line 16 in file lab4.s
+   Uses
+      None
+Comment: IO1CLR unused
+IO1DIR E0028018
+
+Symbol: IO1DIR
+   Definitions
+      At line 14 in file lab4.s
+   Uses
+      At line 201 in file lab4.s
+Comment: IO1DIR used once
+IO1PIN E0028010
+
+Symbol: IO1PIN
+   Definitions
+      At line 15 in file lab4.s
+   Uses
+      None
+Comment: IO1PIN unused
+IO1SET E0028014
+
+Symbol: IO1SET
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Absolute symbols
+
+   Definitions
+      At line 17 in file lab4.s
+   Uses
+      None
+Comment: IO1SET unused
+PINSEL0 E002C000
+
+Symbol: PINSEL0
+   Definitions
+      At line 21 in file lab4.s
+   Uses
+      None
+Comment: PINSEL0 unused
+PIODATA 00000008
+
+Symbol: PIODATA
+   Definitions
+      At line 13 in file lab4.s
+   Uses
+      None
+Comment: PIODATA unused
+RGB_white 00260000
+
+Symbol: RGB_white
+   Definitions
+      At line 26 in file lab4.s
+   Uses
+      None
+Comment: RGB_white unused
+11 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+convert_to_string 00000000
+
+Symbol: convert_to_string
+   Definitions
+      At line 9 in file lab4.s
+   Uses
+      None
+Comment: convert_to_string unused
+display_digit_on_7_seg 00000000
+
+Symbol: display_digit_on_7_seg
+   Definitions
+      At line 10 in file lab4.s
+   Uses
+      At line 167 in file lab4.s
+      At line 211 in file lab4.s
+
+illuminate_RGB_LED 00000000
+
+Symbol: illuminate_RGB_LED
+   Definitions
+      At line 11 in file lab4.s
+   Uses
+      At line 186 in file lab4.s
+      At line 209 in file lab4.s
+
+illuminate_led 00000000
+
+Symbol: illuminate_led
+   Definitions
+      At line 5 in file lab4.s
+   Uses
+      At line 126 in file lab4.s
+      At line 207 in file lab4.s
+
+output_character 00000000
+
+Symbol: output_character
+   Definitions
+      At line 7 in file lab4.s
+   Uses
+      At line 125 in file lab4.s
+      At line 165 in file lab4.s
+
+output_string 00000000
+
+Symbol: output_string
+   Definitions
+      At line 3 in file lab4.s
+   Uses
+      At line 78 in file lab4.s
+      At line 80 in file lab4.s
+      At line 82 in file lab4.s
+      At line 84 in file lab4.s
+      At line 86 in file lab4.s
+      At line 88 in file lab4.s
+      At line 114 in file lab4.s
+      At line 116 in file lab4.s
+      At line 118 in file lab4.s
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+External symbols
+
+      At line 135 in file lab4.s
+      At line 141 in file lab4.s
+      At line 154 in file lab4.s
+      At line 156 in file lab4.s
+      At line 158 in file lab4.s
+      At line 175 in file lab4.s
+      At line 177 in file lab4.s
+      At line 179 in file lab4.s
+      At line 218 in file lab4.s
+
+read_character 00000000
+
+Symbol: read_character
+   Definitions
+      At line 6 in file lab4.s
+   Uses
+      At line 91 in file lab4.s
+      At line 121 in file lab4.s
+      At line 143 in file lab4.s
+      At line 161 in file lab4.s
+      At line 182 in file lab4.s
+
+read_from_push_btns 00000000
+
+Symbol: read_from_push_btns
+   Definitions
+      At line 8 in file lab4.s
+   Uses
+      At line 138 in file lab4.s
+Comment: read_from_push_btns used once
+read_string 00000000
+
+Symbol: read_string
+   Definitions
+      At line 4 in file lab4.s
+   Uses
+      None
+Comment: read_string unused
+9 symbols
+383 symbols in table

@@ -1,0 +1,1722 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             lib, CODE, READWRITE
+    2 00000000                 EXPORT           read_character
+    3 00000000                 EXPORT           output_character
+    4 00000000                 EXPORT           output_string
+    5 00000000                 EXPORT           read_string
+    6 00000000                 EXPORT           pin_connect_block_setup_for_uar
+t0
+    7 00000000                 EXPORT           uart_init
+    8 00000000                 EXPORT           illuminate_led
+    9 00000000                 EXPORT           reflect_number
+   10 00000000                 EXPORT           read_from_push_btns
+   11 00000000                 EXPORT           display_digit_on_7_seg
+   12 00000000                 EXPORT           convert_to_string
+   13 00000000                 EXPORT           illuminate_RGB_LED
+   14 00000000         
+   15 00000000         
+   16 00000000         
+   17 00000000 00000014 
+                       U0LSR   EQU              0x14        ; UART0 Line Status
+                                                             Register
+   18 00000000 00000004 
+                       U0IER   EQU              0x4         ; UART0 Interrupt E
+                                                            nable Register
+   19 00000000 0000000C 
+                       U0LCR   EQU              0xC         ; UART0 Line Contro
+                                                            l Register
+   20 00000000 00000020 
+                       THRE    EQU              0x20
+   21 00000000 E0028018 
+                       IO1DIR  EQU              0xE0028018
+   22 00000000 E0028010 
+                       IO1PIN  EQU              0xE0028010
+   23 00000000 E002801C 
+                       IO1CLR  EQU              0xE002801C
+   24 00000000 E0028014 
+                       IO1SET  EQU              0xE0028014
+   25 00000000 E0028008 
+                       IO0DIR  EQU              0xE0028008
+   26 00000000 E0028000 
+                       IO0SET  EQU              0xE0028000
+   27 00000000 E002800C 
+                       IO0CLR  EQU              0xE002800C
+   28 00000000 E002C000 
+                       PINSEL0 EQU              0xE002C000
+   29 00000000         
+   30 00000000         ;Hexdecimal hard code
+   31 00000000 0000B7A0 
+                       Seg     EQU              0xB7A0
+   32 00000000 00008000 
+                       Hex_g   EQU              0x8000
+   33 00000000 00003780 
+                       Hex_0   EQU              0x3780
+   34 00000000 00000300 
+                       Hex_1   EQU              0x300
+   35 00000000 00009580 
+                       Hex_2   EQU              0x9580
+   36 00000000 00008780 
+                       Hex_3   EQU              0x8780
+   37 00000000 0000A300 
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+                       Hex_4   EQU              0xA300
+   38 00000000 0000A680 
+                       Hex_5   EQU              0xA680
+   39 00000000 0000B680 
+                       Hex_6   EQU              0xB680
+   40 00000000 00000380 
+                       Hex_7   EQU              0x0380
+   41 00000000 0000B780 
+                       Hex_8   EQU              0xB780
+   42 00000000 0000A380 
+                       Hex_9   EQU              0xA380
+   43 00000000 0000B380 
+                       Hex_a   EQU              0xB380
+   44 00000000 0000B600 
+                       Hex_b   EQU              0xB600
+   45 00000000 00003480 
+                       Hex_c   EQU              0x3480
+   46 00000000 00009700 
+                       Hex_d   EQU              0x9700
+   47 00000000 0000B480 
+                       Hex_e   EQU              0xB480
+   48 00000000 0000B080 
+                       Hex_f   EQU              0xB080
+   49 00000000         
+   50 00000000         ;RGB
+   51 00000000 00260000 
+                       RGB_white
+                               EQU              0x260000
+   52 00000000 00020000 
+                       RGB_red EQU              0x20000
+   53 00000000 00040000 
+                       RGB_blue
+                               EQU              0x40000
+   54 00000000 00200000 
+                       RGB_green
+                               EQU              0x200000
+   55 00000000 00060000 
+                       RGB_purple
+                               EQU              0x60000
+   56 00000000 00220000 
+                       RGB_yellow
+                               EQU              0x220000
+   57 00000000 00240000 
+                       RGB_cyan
+                               EQU              0x240000
+   58 00000000         
+   59 00000000         
+   60 00000000 00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00       buffer  =                "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\
+0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0
+\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\
+0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",0
+   61 000000A9         
+   62 000000A9 00 00 00        ALIGN
+   63 000000AC         ;///////////////////////////////////////////////////////
+                       //
+   64 000000AC         
+   65 000000AC         illuminate_RGB_LED
+   66 000000AC         ;Our illuminate RGB LED operates by writing the hexadeci
+                       mal needed to turn on the LED to the IO0 Clear register
+   67 000000AC         
+   68 000000AC E92D403E        STMFD            SP!,{r1,r2,r3,r4,r5,lr}
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+   69 000000B0         
+   70 000000B0 E59F346C        LDR              r3, =IO0CLR
+   71 000000B4 E59F446C        LDR              r4, =IO0SET
+   72 000000B8 E3A05826        LDR              r5, =RGB_white
+   73 000000BC         
+   74 000000BC         
+   75 000000BC E5845000        STR              r5, [r4]    ; First turns off t
+                                                            he RGB LED first be
+                                                            fore turning on a c
+                                                            olor
+   76 000000C0         
+   77 000000C0         ; Comparisons to test for which color to turn on
+   78 000000C0 E3500031        CMP              r0, #49     ;red
+   79 000000C4 E3A05802        LDR              r5, =RGB_red
+   80 000000C8 0A000011        BEQ              turn_on
+   81 000000CC         
+   82 000000CC E3500032        CMP              r0, #50     ;blue
+   83 000000D0 E3A05701        LDR              r5, =RGB_blue
+   84 000000D4 0A00000E        BEQ              turn_on
+   85 000000D8         
+   86 000000D8 E3500033        CMP              r0, #51     ;green
+   87 000000DC E3A05602        LDR              r5, =RGB_green
+   88 000000E0 0A00000B        BEQ              turn_on
+   89 000000E4         
+   90 000000E4 E3500034        CMP              r0, #52     ;yellow
+   91 000000E8 E3A05822        LDR              r5, =RGB_yellow
+   92 000000EC 0A000008        BEQ              turn_on
+   93 000000F0         
+   94 000000F0 E3500035        CMP              r0, #53     ;purple
+   95 000000F4 E3A05806        LDR              r5, =RGB_purple
+   96 000000F8 0A000005        BEQ              turn_on
+   97 000000FC         
+   98 000000FC E3500036        CMP              r0, #54     ;cyan
+   99 00000100 E3A05709        LDR              r5, =RGB_cyan
+  100 00000104 0A000002        BEQ              turn_on
+  101 00000108         
+  102 00000108 E3500037        CMP              r0, #55     ;white
+  103 0000010C E3A05826        LDR              r5, =RGB_white
+  104 00000110 0AFFFFFF        BEQ              turn_on
+  105 00000114         
+  106 00000114         turn_on
+  107 00000114         
+  108 00000114 E5835000        STR              r5, [r3]    ;stores the hexadec
+                                                            imal to clear regis
+                                                            ter which turns the
+                                                             RGB LED on
+  109 00000118         
+  110 00000118 E8BD403E        LDMFD            SP!,{r1,r2,r3,r4,r5,lr}
+  111 0000011C E12FFF1E        BX               lr
+  112 00000120         ;///////////////////////////////////////////////////////
+                       //
+  113 00000120         
+  114 00000120         ;Our read from push buttons operates by pulling the valu
+                       e from IO1PIN after buttons are held
+  115 00000120         ;We then isolate the 20-23 bits and then shift it to be 
+                       the first 4 bits
+  116 00000120         ;After bits are shifted we reflect the bits, and switch 
+                       1s to 0s and 0s to 1s to get the decimal value
+  117 00000120         ;We then converts this decimal value to characters which
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+                        we then print on putty
+  118 00000120         
+  119 00000120         read_from_push_btns
+  120 00000120 E92D4226        STMFD            SP!,{r1, r2, r5, r9, lr}
+  121 00000124 E59F1400        LDR              r1, =IO1DIR ;Port 0 DIR
+  122 00000128 E59F2400        LDR              r2, =IO1PIN
+  123 0000012C         
+  124 0000012C         push_btns_begin
+  125 0000012C EBFFFFFE        BL               read_character
+  126 00000130 E3500061        CMP              r0, #0x61   ;press a after user
+                                                             pushes the button 
+                                                            to display decimal 
+                                                            value on putty
+  127 00000134 1AFFFFFC        BNE              push_btns_begin
+  128 00000138         
+  129 00000138 E5924000        LDR              r4, [r2]
+  130 0000013C E204460F        AND              r4, r4, #0x00F00000 ;Isolates b
+                                                            its 20 - 23
+  131 00000140         
+  132 00000140 E1A04A24        MOV              r4, r4, LSR #20 ;Shift 20 times
+                                                             to get the value f
+                                                            rom pin 20-23
+  133 00000144         
+  134 00000144 EBFFFFFE        BL               reflect_number ;Reflects the nu
+                                                            mber 
+  135 00000148 E3A0500F        MOV              r5, #15     ;Switches the 0 bit
+                                                            s to 1 and 1 bits t
+                                                            o 0
+  136 0000014C E0454004        SUB              r4, r5, r4
+  137 00000150 E1A09004        MOV              r9, r4
+  138 00000154 E59F43D8        LDR              r4, =buffer
+  139 00000158 EBFFFFFE        BL               convert_to_string ;Converts the
+                                                             devimal value to a
+                                                             string 
+  140 0000015C E59F43D0        LDR              r4, =buffer
+  141 00000160 EBFFFFFE        BL               output_string ;Outputs string t
+                                                            o putty 
+  142 00000164         
+  143 00000164 E59F43C8        LDR              r4, =buffer
+  144 00000168 EB000001        BL               clear_string ; clear buffer
+  145 0000016C         
+  146 0000016C         
+  147 0000016C E8BD4226        LDMFD            SP!,{r1, r2, r5 ,r9 ,lr}
+  148 00000170 E12FFF1E        BX               lr
+  149 00000174         
+  150 00000174         
+  151 00000174         ;///////////////////////////////////////////////////////
+                       /
+  152 00000174         
+  153 00000174         ;This routine takes in a buffer which we then clear by c
+                       hanging every non null character to a null 
+  154 00000174         ;Terminates after the end of string is reach in other wo
+                       rds a null character is reached
+  155 00000174         
+  156 00000174         clear_string
+  157 00000174 E92D4009        STMFD            sp!,{lr, r0, r3}
+  158 00000178         
+  159 00000178         clear
+  160 00000178 E5D40000        LDRB             r0, [r4]
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+  161 0000017C E3500000        CMP              r0, #0      ; comparing for nul
+                                                            l
+  162 00000180 0A000003        BEQ              clear_exit
+  163 00000184 E3A03000        LDR              r3, =0x0
+  164 00000188 E5843000        STR              r3, [r4]
+  165 0000018C E2844001        ADD              r4, r4, #1
+  166 00000190         
+  167 00000190 EAFFFFF8        B                clear
+  168 00000194         
+  169 00000194         clear_exit
+  170 00000194 E8BD4009        LDMFD            sp!,{lr, r0, r3}
+  171 00000198 E12FFF1E        BX               lr
+  172 0000019C         
+  173 0000019C         ;///////////////////////////////////////////////////////
+                       /
+  174 0000019C         display_digit_on_7_seg               ;input=r0
+  175 0000019C         
+  176 0000019C         ;Display subroutine works by writing a specific hexadeci
+                       mal to IO0SET.
+  177 0000019C         ;This hexadecmial specifies which segment to turn on.
+  178 0000019C         
+  179 0000019C E92D403C        STMFD            SP!,{r2,r3,r4,r5,lr}
+  180 000001A0         
+  181 000001A0 E59F2380        LDR              r2, =IO0SET ;Set register
+  182 000001A4 E59F3378        LDR              r3, =IO0CLR ;Port 0 clear regis
+                                                            ter 
+  183 000001A8         
+  184 000001A8         
+  185 000001A8 E3500030        CMP              r0, #48
+  186 000001AC E3A05DDE        LDR              r5, =Hex_0  ;7 seg displays 0 
+  187 000001B0 0A00002F        BEQ              display
+  188 000001B4         
+  189 000001B4 E3500031        CMP              r0, #49
+  190 000001B8 E3A05C03        LDR              r5, =Hex_1  ;7 seg displays 1 
+  191 000001BC 0A00002C        BEQ              display
+  192 000001C0         
+  193 000001C0 E3500032        CMP              r0, #50
+  194 000001C4 E59F536C        LDR              r5, =Hex_2  ;7 seg displays 2 e
+                                                            tc...
+  195 000001C8 0A000029        BEQ              display
+  196 000001CC         
+  197 000001CC E3500033        CMP              r0, #51
+  198 000001D0 E59F5364        LDR              r5, =Hex_3
+  199 000001D4 0A000026        BEQ              display
+  200 000001D8         
+  201 000001D8 E3500034        CMP              r0, #52
+  202 000001DC E3A05CA3        LDR              r5, =Hex_4
+  203 000001E0 0A000023        BEQ              display
+  204 000001E4         
+  205 000001E4 E3500035        CMP              r0, #53
+  206 000001E8 E59F5350        LDR              r5, =Hex_5
+  207 000001EC 0A000020        BEQ              display
+  208 000001F0         
+  209 000001F0 E3500036        CMP              r0, #54
+  210 000001F4 E59F5348        LDR              r5, =Hex_6
+  211 000001F8 0A00001D        BEQ              display
+  212 000001FC         
+  213 000001FC E3500037        CMP              r0, #55
+  214 00000200 E3A05D0E        LDR              r5, =Hex_7
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+  215 00000204 0A00001A        BEQ              display
+  216 00000208         
+  217 00000208 E3500038        CMP              r0, #56
+  218 0000020C E59F5334        LDR              r5, =Hex_8
+  219 00000210 0A000017        BEQ              display
+  220 00000214         
+  221 00000214 E3500039        CMP              r0, #57
+  222 00000218 E59F532C        LDR              r5, =Hex_9
+  223 0000021C 0A000014        BEQ              display
+  224 00000220         
+  225 00000220 E3500041        CMP              r0, #65
+  226 00000224 E59F5324        LDR              r5, =Hex_a
+  227 00000228 0A000011        BEQ              display
+  228 0000022C         
+  229 0000022C E3500042        CMP              r0, #66
+  230 00000230 E3A05CB6        LDR              r5, =Hex_b
+  231 00000234 0A00000E        BEQ              display
+  232 00000238         
+  233 00000238 E3500043        CMP              r0, #67
+  234 0000023C E3A05DD2        LDR              r5, =Hex_c
+  235 00000240 0A00000B        BEQ              display
+  236 00000244         
+  237 00000244 E3500044        CMP              r0, #68
+  238 00000248 E3A05C97        LDR              r5, =Hex_d
+  239 0000024C 0A000008        BEQ              display
+  240 00000250         
+  241 00000250 E3500045        CMP              r0, #69
+  242 00000254 E59F52F8        LDR              r5, =Hex_e
+  243 00000258 0A000005        BEQ              display
+  244 0000025C         
+  245 0000025C E3500046        CMP              r0, #70
+  246 00000260 E59F52F0        LDR              r5, =Hex_f
+  247 00000264 0A000002        BEQ              display
+  248 00000268         
+  249 00000268 E3500047        CMP              r0, #71
+  250 0000026C E3A05902        LDR              r5, =Hex_g
+  251 00000270 0AFFFFFF        BEQ              display
+  252 00000274         
+  253 00000274         
+  254 00000274         display
+  255 00000274 E5825000        STR              r5, [r2]    ; stores the hexade
+                                                            cimal to IO0SET reg
+                                                            ister
+  256 00000278         
+  257 00000278 E8BD403C        LDMFD            SP!,{r2,r3,r4,r5,lr}
+  258 0000027C E12FFF1E        BX               lr
+  259 00000280         
+  260 00000280         
+  261 00000280         ;///////////////////////////////////////////////////////
+                       // 
+  262 00000280         illuminate_led
+  263 00000280 E92D401F        STMFD            SP!,{r0,r1,r2,r3,r4,lr}
+  264 00000284         
+  265 00000284         ;Illuminate led operates by first turning all the leds o
+                       ff before turning them back on again
+  266 00000284         ;This is done by taking the number read from on putty, r
+                       eflecting it before shifting it to the 16-19th bits.
+  267 00000284         ;This hexadecimal is then stored in to the IO1CLR regist
+                       er which turns the led on
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+  268 00000284         
+  269 00000284 E59F22D0        LDR              r2, =IO1CLR ;Port 1 clear regis
+                                                            ter
+  270 00000288 E59F32D0        LDR              r3, =0xE0028014 ;Set register
+  271 0000028C         
+  272 0000028C E3A0180F        LDR              r1, =0xF0000
+  273 00000290 E5831000        STR              r1, [r3]    ;set it off at the 
+                                                            beginning
+  274 00000294         
+  275 00000294         
+  276 00000294 E3500039        CMP              r0, #0x39   ;If read character 
+                                                            is greater than '9'
+                                                             branches to A-F ca
+                                                            se
+  277 00000298 CA000001        BGT              A_F
+  278 0000029C E2404030        SUB              r4, r0, #48 ;If read character 
+                                                            is less than or equ
+                                                            al to 9 subtract #4
+                                                            8 to make it a deci
+                                                            mal value
+  279 000002A0 EA000000        B                light_led
+  280 000002A4         A_F
+  281 000002A4 E2404037        SUB              r4, r0, #55 ;If read character 
+                                                            is A-F subtracts #5
+                                                            5 to convert it to 
+                                                            decimal
+  282 000002A8         light_led
+  283 000002A8 EBFFFFFE        BL               reflect_number ;Relects number 
+                                                            to follow conventio
+                                                            n where 16th bit is
+                                                             the MSB 
+  284 000002AC         
+  285 000002AC E1A00804        MOV              r0, r4, LSL #16 ;Shift the numb
+                                                            er 16 bits to the l
+                                                            eft
+  286 000002B0         
+  287 000002B0 E5820000        STR              r0, [r2]    ;Stores to clear re
+                                                            gister to turn led 
+                                                            on
+  288 000002B4         
+  289 000002B4 E8BD401F        LDMFD            SP!,{r0,r1,r2,r3,r4,lr}
+  290 000002B8 E12FFF1E        BX               lr
+  291 000002BC         ;///////////////////////////////////////////////////////
+                       // 
+  292 000002BC         reflect_number                       ; input r4
+  293 000002BC         
+  294 000002BC         ;This routine reflects the bit of the number 
+  295 000002BC         
+  296 000002BC E92D4020        STMFD            SP!,{r5,lr}
+  297 000002C0         
+  298 000002C0 E3A05000        MOV              r5, #0
+  299 000002C4         
+  300 000002C4 E3540008        CMP              r4, #8      ;compare 8 Compares
+                                                             value to #8 if it 
+                                                            is greater add 1 to
+                                                             r5
+  301 000002C8 BA000001        BLT              compare_4
+  302 000002CC E2444008        SUB              r4, r4, #8  ;subtracts 8
+  303 000002D0 E2855001        ADD              r5, r5, #1
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+  304 000002D4         
+  305 000002D4         compare_4
+  306 000002D4 E3540004        CMP              r4, #4      ;compare 4 Compares
+                                                             value to #4 if it 
+                                                            is greater add 2 to
+                                                             r5
+  307 000002D8 BA000001        BLT              compare_2
+  308 000002DC E2444004        SUB              r4, r4, #4  ;subtracts 4 
+  309 000002E0 E2855002        ADD              r5, r5, #2
+  310 000002E4         
+  311 000002E4         compare_2
+  312 000002E4 E3540002        CMP              r4, #2      ;compare 2 Compares
+                                                             value to #2 if it 
+                                                            is greater add 4 to
+                                                             r5
+  313 000002E8 BA000001        BLT              compare_1
+  314 000002EC E2444002        SUB              r4, r4, #2  ;subtracts 2 
+  315 000002F0 E2855004        ADD              r5, r5, #4
+  316 000002F4         
+  317 000002F4         compare_1
+  318 000002F4 E3540001        CMP              r4, #1      ;Compares value to 
+                                                            #1 if it is greater
+                                                             add 8 to r5
+  319 000002F8 BA000000        BLT              reflect_exit
+  320 000002FC E2855008        ADD              r5, r5, #8
+  321 00000300         
+  322 00000300         reflect_exit
+  323 00000300         
+  324 00000300 E1A04005        MOV              r4, r5
+  325 00000304         
+  326 00000304 E8BD4020        LDMFD            SP!,{r5,lr}
+  327 00000308 E12FFF1E        BX               lr
+  328 0000030C         ;///////////////////////////////////////////////////////
+                       // 
+  329 0000030C         uart_init
+  330 0000030C E92D4000        STMFD            SP!,{lr}
+  331 00000310 E59F024C        LDR              r0, =0xE000C000 ;Base address 0
+                                                            xE000C000
+  332 00000314         
+  333 00000314 E3A01083        MOV              r1, #0x83   ;Loads the bit 1000
+                                                            0011 to the U0LCR
+  334 00000318 E5C0100C        STRB             r1, [r0, #U0LCR]
+  335 0000031C         
+  336 0000031C E3A01078        MOV              r1, #0x78   ;Loads the bit 1111
+                                                            0000 to the Base ad
+                                                            dress
+  337 00000320 E5C01000        STRB             r1, [r0]
+  338 00000324         
+  339 00000324 E3A01000        MOV              r1, #0x0    ;Loads the bit 0000
+                                                            0000 to the U0IER
+  340 00000328 E5C01004        STRB             r1, [r0, #U0IER]
+  341 0000032C         
+  342 0000032C E3A01003        MOV              r1, #0x3    ;Loads the bit 0000
+                                                            0011 to the U0LCR
+  343 00000330 E5C0100C        STRB             r1, [r0, #U0LCR]
+  344 00000334         
+  345 00000334 E8BD4000        LDMFD            sp!, {lr}
+  346 00000338 E12FFF1E        BX               lr
+  347 0000033C         
+
+
+
+ARM Macro Assembler    Page 10 
+
+
+  348 0000033C         ;///////////////////////////////////////////////////////
+                       //
+  349 0000033C         
+  350 0000033C         read_character
+  351 0000033C E92D400E        STMFD            sp!,{r1,r2,r3,lr}
+  352 00000340         
+  353 00000340         read_character_begin
+  354 00000340 E59F1220        LDR              r1, =0xE000C014
+  355 00000344 E59F3218        LDR              r3, =0xE000C000
+  356 00000348         
+  357 00000348 E5D12000        LDRB             r2, [r1]    ;Pulls the bits out
+                                                             from the line stat
+                                                            us register to r2
+  358 0000034C E2022001        AND              r2, r2, #1  ;Compares r2 to a b
+                                                            it mask to isolate 
+                                                            the first bit
+  359 00000350 E3520000        CMP              r2, #0      ;When the first bit
+                                                             is 0 there is char
+                                                            acter in the reciev
+                                                            ing bufffer
+  360 00000354         
+  361 00000354 0AFFFFF9        BEQ              read_character_begin
+  362 00000358         
+  363 00000358 E5D30000        LDRB             r0, [r3]    ;Read byte from rec
+                                                            eive register
+  364 0000035C         
+  365 0000035C E8BD400E        LDMFD            sp!, {r1,r2,r3,lr}
+  366 00000360 E12FFF1E        BX               lr
+  367 00000364         
+  368 00000364         ;///////////////////////////////////////////////////////
+                       // 
+  369 00000364         
+  370 00000364         output_character
+  371 00000364 E92D400E        STMFD            sp!,{r1,r2,r3,lr}
+  372 00000368         
+  373 00000368         output_character_begin
+  374 00000368 E59F11F8        LDR              r1, =0xE000C014
+  375 0000036C E59F31F0        LDR              r3, =0xE000C000
+  376 00000370         
+  377 00000370 E5D12000        LDRB             r2, [r1]
+  378 00000374 E2022020        AND              r2, r2, #THRE ; Isolates the TH
+                                                            RE bit of the statu
+                                                            s register and stor
+                                                            es result to r5
+  379 00000378 E3520020        CMP              r2, #THRE   ; Compares mask to 
+                                                            isolated THRE bit
+  380 0000037C         
+  381 0000037C 1AFFFFF9        BNE              output_character_begin ; If the
+                                                             isolated bit isn't
+                                                             equal to the mask 
+                                                            goes back to loop
+  382 00000380         
+  383 00000380 E5C30000        STRB             r0, [r3]    ; Stores character 
+                                                            to the transmit reg
+                                                            ister
+  384 00000384 E8BD400E        LDMFD            sp!, {r1,r2,r3,lr}
+  385 00000388         
+  386 00000388 E12FFF1E        BX               lr
+  387 0000038C         
+
+
+
+ARM Macro Assembler    Page 11 
+
+
+  388 0000038C         ;///////////////////////////////////////////////////////
+                       //
+  389 0000038C         
+  390 0000038C         output_string
+  391 0000038C E92D4000        STMFD            SP!,{lr}
+  392 00000390         output_string_begin
+  393 00000390 E5D40000        LDRB             r0, [r4]
+  394 00000394 E3500000        CMP              r0, #0      ; comparing for nul
+                                                            l
+  395 00000398 0A000002        BEQ              output_string_exit ;If characte
+                                                            r is null branch to
+                                                             the exit of output
+                                                             string
+  396 0000039C         
+  397 0000039C E2844001        ADD              r4, r4, #1  ;Increments index o
+                                                            f the string to be 
+                                                            printed
+  398 000003A0 EBFFFFFE        BL               output_character
+  399 000003A4 EAFFFFF9        B                output_string_begin ;branch to 
+                                                            the beginning 
+  400 000003A8         
+  401 000003A8         output_string_exit
+  402 000003A8 E8BD4000        LDMFD            sp!, {lr}   ;load return addres
+                                                            s of lr
+  403 000003AC E12FFF1E        BX               lr          ;branches back to m
+                                                            ain code
+  404 000003B0         
+  405 000003B0         ;///////////////////////////////////////////////////////
+                       // 
+  406 000003B0         
+  407 000003B0         read_string
+  408 000003B0 E92D4000        STMFD            SP!,{lr}
+  409 000003B4         read_string_begin
+  410 000003B4 EBFFFFFE        BL               read_character ;read inputed ch
+                                                            aracter
+  411 000003B8 E350000D        CMP              r0, #0xD    ; checking for ente
+                                                            r
+  412 000003BC 0A000003        BEQ              read_string_exit
+  413 000003C0         
+  414 000003C0 E5840000        STR              r0, [r4]
+  415 000003C4 E2844001        ADD              r4, r4, #1  ;Increments index o
+                                                            f the string buffer
+                                                            
+  416 000003C8 EBFFFFFE        BL               output_character ;Echos read ch
+                                                            aracter
+  417 000003CC EAFFFFF8        B                read_string_begin ;branch to th
+                                                            e beginning 
+  418 000003D0         
+  419 000003D0         read_string_exit
+  420 000003D0 E3A00000        MOV              r0, #0
+  421 000003D4 E5840000        STR              r0, [r4]
+  422 000003D8         
+  423 000003D8 E3A0000A        MOV              r0, #0xA    ; printing new line
+                                                            
+  424 000003DC EBFFFFFE        BL               output_character
+  425 000003E0 E3A0000D        MOV              r0, #0xD    ; printing carriage
+                                                             return
+  426 000003E4 EBFFFFFE        BL               output_character
+  427 000003E8         
+
+
+
+ARM Macro Assembler    Page 12 
+
+
+  428 000003E8 E8BD4000        LDMFD            sp!, {lr}   ;load return addres
+                                                            s of lr
+  429 000003EC E12FFF1E        BX               lr          ;branches back to m
+                                                            ain code 
+  430 000003F0         
+  431 000003F0         ;///////////////////////////////////////////////////////
+                       //
+  432 000003F0         div_mod
+  433 000003F0 E92D5D00        STMFD            sp!,{r10, r8, r11, r12,lr}
+  434 000003F4         ;r5 = Divisor
+  435 000003F4         ;r9 = Dividend
+  436 000003F4         ;r10 = Counter
+  437 000003F4         ;r11 = Quotient
+  438 000003F4         ;r12 = Remainder
+  439 000003F4         ;r8 = +- counter
+  440 000003F4         
+  441 000003F4 E3A0B000        MOV              r11, #0
+  442 000003F8 E3A08000        MOV              r8, #0
+  443 000003FC         ;Divisor > 0?
+  444 000003FC E3550000        CMP              r5, #0
+  445 00000400 CA000001        BGT              divisor_positive
+  446 00000404         ;NO, Divisor < 0, get it positive
+  447 00000404 E04B5005        SUB              r5, r11, r5
+  448 00000408 E2888001        ADD              r8, r8, #1
+  449 0000040C         ;Now Divisor > 0
+  450 0000040C         ;Dividend > 0?
+  451 0000040C         divisor_positive
+  452 0000040C E3590000        CMP              r9, #0
+  453 00000410 CA000001        BGT              both_positive
+  454 00000414         ;NO, Dividend < 0, get it positive
+  455 00000414 E04B9009        SUB              r9, r11, r9
+  456 00000418 E2488001        SUB              r8, r8, #1
+  457 0000041C         ;Now Divisor > 0 and Dividend > 0
+  458 0000041C         
+  459 0000041C         both_positive
+  460 0000041C E3A0A010        MOV              r10, #16
+  461 00000420 E3A0B000        MOV              r11, #0
+  462 00000424 E1A05805        MOV              r5, r5, LSL #16
+  463 00000428 E1A0C009        MOV              r12, r9
+  464 0000042C EA000000        B                DIV_BEGIN
+  465 00000430         
+  466 00000430         L_START
+  467 00000430 E24AA001        SUB              r10, r10, #1
+  468 00000434         DIV_BEGIN
+  469 00000434 E04CC005        SUB              r12, r12, r5
+  470 00000438         
+  471 00000438 E35C0000        CMP              r12, #0
+  472 0000043C BA000002        BLT              YES         ;when Remainder is 
+                                                            >= 0
+  473 00000440 E1A0B08B        MOV              r11, r11, LSL #1
+  474 00000444 E28BB001        ADD              r11, r11, #1
+  475 00000448 EA000001        B                END_B
+  476 0000044C         
+  477 0000044C         YES                                  ;when Remainder < 0
+                                                            
+  478 0000044C E08CC005        ADD              r12, r12, r5
+  479 00000450 E1A0B08B        MOV              r11, r11, LSL #1
+  480 00000454         
+  481 00000454         END_B
+
+
+
+ARM Macro Assembler    Page 13 
+
+
+  482 00000454 E1A050A5        MOV              r5, r5, LSR #1 ;when Counter > 
+                                                            0, go in LOOP_START
+                                                            
+  483 00000458 E35A0000        CMP              r10, #0
+  484 0000045C CAFFFFF3        BGT              L_START     ;when Counter <= 0 
+                                                               STOP LOOP
+  485 00000460 E1A0500C        MOV              r5, r12     ;r5 is the remainde
+                                                            r
+  486 00000464         ;if r8 == 0 then quotient should be positive
+  487 00000464 E3580000        CMP              r8, #0
+  488 00000468 0A000001        BEQ              P_FINAL
+  489 0000046C E3A08000        MOV              r8, #0
+  490 00000470 E048B00B        SUB              r11, r8, r11
+  491 00000474         
+  492 00000474         P_FINAL
+  493 00000474 E1A0900B        MOV              r9, r11     ;r9 is the quotient
+                                                             
+  494 00000478         
+  495 00000478 E8BD5D00        LDMFD            sp!,{r10,r11,r8,r12,lr}
+  496 0000047C E12FFF1E        BX               lr
+  497 00000480         ;///////////////////////////////////////////////////////
+                       //
+  498 00000480         ;this subroutine will compare the quotient and remainder
+                        to 1000 ,100 ,10 ,1 
+  499 00000480         convert_to_string
+  500 00000480 E92D4222        STMFD            SP!,{lr, r1, r9, r5}
+  501 00000484         ;r5 divisor where we will use 1000, 100, 10, 1
+  502 00000484         
+  503 00000484 E3590FFA        CMP              r9, #1000   ;compares the numbe
+                                                            r in r9 to 1000 if 
+                                                            it greater divide b
+                                                            y 1000 get characte
+                                                            r
+  504 00000488 BA000001        BLT              compare_100
+  505 0000048C E3A01FFA        MOV              r1, #1000   ;divisor becomes 10
+                                                            00
+  506 00000490 EA00000A        B                converting
+  507 00000494         
+  508 00000494         compare_100
+  509 00000494 E3590064        CMP              r9, #100    ;compares the numbe
+                                                            r in r9 to 100 if i
+                                                            t greater divide by
+                                                             1000 get character
+                                                            
+  510 00000498 BA000001        BLT              compare_10
+  511 0000049C E3A01064        MOV              r1, #100    ;divisor becomes 10
+                                                            0
+  512 000004A0 EA000006        B                converting
+  513 000004A4         
+  514 000004A4         compare_10
+  515 000004A4 E359000A        CMP              r9, #10     ;compares the numbe
+                                                            r in r9 to 10 if it
+                                                             greater divide by 
+                                                            1000 get character
+  516 000004A8 BA000001        BLT              one
+  517 000004AC E3A0100A        MOV              r1, #10     ;divisor becomes 10
+                                                            
+  518 000004B0 EA000002        B                converting
+  519 000004B4         
+
+
+
+ARM Macro Assembler    Page 14 
+
+
+  520 000004B4         one
+  521 000004B4 E3A01001        MOV              r1, #1      ;divisor becomes 1
+  522 000004B8 EA000000        B                converting
+  523 000004BC         
+  524 000004BC         loop_decrease_divisor_by10
+  525 000004BC EB000009        BL               decrease_divisor_by10
+  526 000004C0         converting
+  527 000004C0 E1A05001        MOV              r5, r1
+  528 000004C4 EBFFFFC9        BL               div_mod     ;returns remainder 
+                                                            to r5 and quotient 
+                                                            r9
+  529 000004C8 E2899030        ADD              r9, r9, #48 ;The quotient will 
+                                                            be in decimal by ad
+                                                            ding #48 it becomes
+                                                             a integer characte
+                                                            r
+  530 000004CC E5C49000        STRB             r9, [r4]    ;Stores character t
+                                                            o string 
+  531 000004D0 E2844001        ADD              r4, r4, #1  ; Increments string
+                                                            
+  532 000004D4 E1A09005        MOV              r9, r5      ; makes the remaind
+                                                            er the dividend 
+  533 000004D8 E3510001        CMP              r1,#1       ; Repeats until rem
+                                                            ainder is 0
+  534 000004DC 1AFFFFF6        BNE              loop_decrease_divisor_by10
+  535 000004E0         
+  536 000004E0 E8BD4222        LDMFD            sp!, {lr, r1, r9, r5}
+  537 000004E4 E12FFF1E        BX               lr
+  538 000004E8         
+  539 000004E8         ;///////////////////////////////////////////////////////
+                       //
+  540 000004E8         decrease_divisor_by10
+  541 000004E8 E92D4220        STMFD            sp!, {lr, r9, r5}
+  542 000004EC         
+  543 000004EC E1A09001        MOV              r9, r1
+  544 000004F0 E3A0500A        MOV              r5, #10
+  545 000004F4 EBFFFFBD        BL               div_mod
+  546 000004F8 E1A01009        MOV              r1, r9
+  547 000004FC         
+  548 000004FC E8BD4220        LDMFD            sp!, {lr, r9, r5}
+  549 00000500 E12FFF1E        BX               lr
+  550 00000504         ;///////////////////////////////////////////////////////
+                       // 
+  551 00000504         pin_connect_block_setup_for_uart0
+  552 00000504 E92D4007        STMFD            sp!, {r0, r1, lr,r2}
+  553 00000508 E59F005C        LDR              r0, =0xE002C000 ; PINSEL0
+  554 0000050C E5901000        LDR              r1, [r0]
+  555 00000510 E3811005        ORR              r1, r1, #5
+  556 00000514 E3C1100A        BIC              r1, r1, #0xA
+  557 00000518 E5801000        STR              r1, [r0]
+  558 0000051C E8BD4007        LDMFD            sp!, {r0, r1, lr,r2}
+  559 00000520 E12FFF1E        BX               lr
+  560 00000524         
+  561 00000524                 END
+              E002800C 
+              E0028000 
+              E0028018 
+              E0028010 
+              00000000 
+
+
+
+ARM Macro Assembler    Page 15 
+
+
+              00009580 
+              00008780 
+              0000A680 
+              0000B680 
+              0000B780 
+              0000A380 
+              0000B380 
+              0000B480 
+              0000B080 
+              E002801C 
+              E0028014 
+              E000C000 
+              E000C014 
+              E002C000 
+Command Line: --debug --xref --diag_suppress=9931 --apcs=interwork --depend=.\o
+bjects\library4.d -o.\objects\library4.o -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v5
+\ARM\CMSIS\Include -IC:\Keil_v5\ARM\INC\Philips --predefine="__EVAL SETA 1" --p
+redefine="__UVISION_VERSION SETA 524" --list=.\listings\library4.lst library4.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+A_F 000002A4
+
+Symbol: A_F
+   Definitions
+      At line 280 in file library4.s
+   Uses
+      At line 277 in file library4.s
+Comment: A_F used once
+DIV_BEGIN 00000434
+
+Symbol: DIV_BEGIN
+   Definitions
+      At line 468 in file library4.s
+   Uses
+      At line 464 in file library4.s
+Comment: DIV_BEGIN used once
+END_B 00000454
+
+Symbol: END_B
+   Definitions
+      At line 481 in file library4.s
+   Uses
+      At line 475 in file library4.s
+Comment: END_B used once
+L_START 00000430
+
+Symbol: L_START
+   Definitions
+      At line 466 in file library4.s
+   Uses
+      At line 484 in file library4.s
+Comment: L_START used once
+P_FINAL 00000474
+
+Symbol: P_FINAL
+   Definitions
+      At line 492 in file library4.s
+   Uses
+      At line 488 in file library4.s
+Comment: P_FINAL used once
+YES 0000044C
+
+Symbol: YES
+   Definitions
+      At line 477 in file library4.s
+   Uses
+      At line 472 in file library4.s
+Comment: YES used once
+both_positive 0000041C
+
+Symbol: both_positive
+   Definitions
+      At line 459 in file library4.s
+   Uses
+      At line 453 in file library4.s
+Comment: both_positive used once
+buffer 00000000
+
+Symbol: buffer
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 60 in file library4.s
+   Uses
+      At line 138 in file library4.s
+      At line 140 in file library4.s
+      At line 143 in file library4.s
+
+clear 00000178
+
+Symbol: clear
+   Definitions
+      At line 159 in file library4.s
+   Uses
+      At line 167 in file library4.s
+Comment: clear used once
+clear_exit 00000194
+
+Symbol: clear_exit
+   Definitions
+      At line 169 in file library4.s
+   Uses
+      At line 162 in file library4.s
+Comment: clear_exit used once
+clear_string 00000174
+
+Symbol: clear_string
+   Definitions
+      At line 156 in file library4.s
+   Uses
+      At line 144 in file library4.s
+Comment: clear_string used once
+compare_1 000002F4
+
+Symbol: compare_1
+   Definitions
+      At line 317 in file library4.s
+   Uses
+      At line 313 in file library4.s
+Comment: compare_1 used once
+compare_10 000004A4
+
+Symbol: compare_10
+   Definitions
+      At line 514 in file library4.s
+   Uses
+      At line 510 in file library4.s
+Comment: compare_10 used once
+compare_100 00000494
+
+Symbol: compare_100
+   Definitions
+      At line 508 in file library4.s
+   Uses
+      At line 504 in file library4.s
+Comment: compare_100 used once
+compare_2 000002E4
+
+Symbol: compare_2
+   Definitions
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 311 in file library4.s
+   Uses
+      At line 307 in file library4.s
+Comment: compare_2 used once
+compare_4 000002D4
+
+Symbol: compare_4
+   Definitions
+      At line 305 in file library4.s
+   Uses
+      At line 301 in file library4.s
+Comment: compare_4 used once
+convert_to_string 00000480
+
+Symbol: convert_to_string
+   Definitions
+      At line 499 in file library4.s
+   Uses
+      At line 12 in file library4.s
+      At line 139 in file library4.s
+
+converting 000004C0
+
+Symbol: converting
+   Definitions
+      At line 526 in file library4.s
+   Uses
+      At line 506 in file library4.s
+      At line 512 in file library4.s
+      At line 518 in file library4.s
+      At line 522 in file library4.s
+
+decrease_divisor_by10 000004E8
+
+Symbol: decrease_divisor_by10
+   Definitions
+      At line 540 in file library4.s
+   Uses
+      At line 525 in file library4.s
+Comment: decrease_divisor_by10 used once
+display 00000274
+
+Symbol: display
+   Definitions
+      At line 254 in file library4.s
+   Uses
+      At line 187 in file library4.s
+      At line 191 in file library4.s
+      At line 195 in file library4.s
+      At line 199 in file library4.s
+      At line 203 in file library4.s
+      At line 207 in file library4.s
+      At line 211 in file library4.s
+      At line 215 in file library4.s
+      At line 219 in file library4.s
+      At line 223 in file library4.s
+      At line 227 in file library4.s
+      At line 231 in file library4.s
+      At line 235 in file library4.s
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 239 in file library4.s
+      At line 243 in file library4.s
+      At line 247 in file library4.s
+      At line 251 in file library4.s
+
+display_digit_on_7_seg 0000019C
+
+Symbol: display_digit_on_7_seg
+   Definitions
+      At line 174 in file library4.s
+   Uses
+      At line 11 in file library4.s
+Comment: display_digit_on_7_seg used once
+div_mod 000003F0
+
+Symbol: div_mod
+   Definitions
+      At line 432 in file library4.s
+   Uses
+      At line 528 in file library4.s
+      At line 545 in file library4.s
+
+divisor_positive 0000040C
+
+Symbol: divisor_positive
+   Definitions
+      At line 451 in file library4.s
+   Uses
+      At line 445 in file library4.s
+Comment: divisor_positive used once
+illuminate_RGB_LED 000000AC
+
+Symbol: illuminate_RGB_LED
+   Definitions
+      At line 65 in file library4.s
+   Uses
+      At line 13 in file library4.s
+Comment: illuminate_RGB_LED used once
+illuminate_led 00000280
+
+Symbol: illuminate_led
+   Definitions
+      At line 262 in file library4.s
+   Uses
+      At line 8 in file library4.s
+Comment: illuminate_led used once
+lib 00000000
+
+Symbol: lib
+   Definitions
+      At line 1 in file library4.s
+   Uses
+      None
+Comment: lib unused
+light_led 000002A8
+
+Symbol: light_led
+   Definitions
+      At line 282 in file library4.s
+
+
+
+ARM Macro Assembler    Page 5 Alphabetic symbol ordering
+Relocatable symbols
+
+   Uses
+      At line 279 in file library4.s
+Comment: light_led used once
+loop_decrease_divisor_by10 000004BC
+
+Symbol: loop_decrease_divisor_by10
+   Definitions
+      At line 524 in file library4.s
+   Uses
+      At line 534 in file library4.s
+Comment: loop_decrease_divisor_by10 used once
+one 000004B4
+
+Symbol: one
+   Definitions
+      At line 520 in file library4.s
+   Uses
+      At line 516 in file library4.s
+Comment: one used once
+output_character 00000364
+
+Symbol: output_character
+   Definitions
+      At line 370 in file library4.s
+   Uses
+      At line 3 in file library4.s
+      At line 398 in file library4.s
+      At line 416 in file library4.s
+      At line 424 in file library4.s
+      At line 426 in file library4.s
+
+output_character_begin 00000368
+
+Symbol: output_character_begin
+   Definitions
+      At line 373 in file library4.s
+   Uses
+      At line 381 in file library4.s
+Comment: output_character_begin used once
+output_string 0000038C
+
+Symbol: output_string
+   Definitions
+      At line 390 in file library4.s
+   Uses
+      At line 4 in file library4.s
+      At line 141 in file library4.s
+
+output_string_begin 00000390
+
+Symbol: output_string_begin
+   Definitions
+      At line 392 in file library4.s
+   Uses
+      At line 399 in file library4.s
+Comment: output_string_begin used once
+output_string_exit 000003A8
+
+Symbol: output_string_exit
+
+
+
+ARM Macro Assembler    Page 6 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 401 in file library4.s
+   Uses
+      At line 395 in file library4.s
+Comment: output_string_exit used once
+pin_connect_block_setup_for_uart0 00000504
+
+Symbol: pin_connect_block_setup_for_uart0
+   Definitions
+      At line 551 in file library4.s
+   Uses
+      At line 6 in file library4.s
+Comment: pin_connect_block_setup_for_uart0 used once
+push_btns_begin 0000012C
+
+Symbol: push_btns_begin
+   Definitions
+      At line 124 in file library4.s
+   Uses
+      At line 127 in file library4.s
+Comment: push_btns_begin used once
+read_character 0000033C
+
+Symbol: read_character
+   Definitions
+      At line 350 in file library4.s
+   Uses
+      At line 2 in file library4.s
+      At line 125 in file library4.s
+      At line 410 in file library4.s
+
+read_character_begin 00000340
+
+Symbol: read_character_begin
+   Definitions
+      At line 353 in file library4.s
+   Uses
+      At line 361 in file library4.s
+Comment: read_character_begin used once
+read_from_push_btns 00000120
+
+Symbol: read_from_push_btns
+   Definitions
+      At line 119 in file library4.s
+   Uses
+      At line 10 in file library4.s
+Comment: read_from_push_btns used once
+read_string 000003B0
+
+Symbol: read_string
+   Definitions
+      At line 407 in file library4.s
+   Uses
+      At line 5 in file library4.s
+Comment: read_string used once
+read_string_begin 000003B4
+
+Symbol: read_string_begin
+   Definitions
+
+
+
+ARM Macro Assembler    Page 7 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 409 in file library4.s
+   Uses
+      At line 417 in file library4.s
+Comment: read_string_begin used once
+read_string_exit 000003D0
+
+Symbol: read_string_exit
+   Definitions
+      At line 419 in file library4.s
+   Uses
+      At line 412 in file library4.s
+Comment: read_string_exit used once
+reflect_exit 00000300
+
+Symbol: reflect_exit
+   Definitions
+      At line 322 in file library4.s
+   Uses
+      At line 319 in file library4.s
+Comment: reflect_exit used once
+reflect_number 000002BC
+
+Symbol: reflect_number
+   Definitions
+      At line 292 in file library4.s
+   Uses
+      At line 9 in file library4.s
+      At line 134 in file library4.s
+      At line 283 in file library4.s
+
+turn_on 00000114
+
+Symbol: turn_on
+   Definitions
+      At line 106 in file library4.s
+   Uses
+      At line 80 in file library4.s
+      At line 84 in file library4.s
+      At line 88 in file library4.s
+      At line 92 in file library4.s
+      At line 96 in file library4.s
+      At line 100 in file library4.s
+      At line 104 in file library4.s
+
+uart_init 0000030C
+
+Symbol: uart_init
+   Definitions
+      At line 329 in file library4.s
+   Uses
+      At line 7 in file library4.s
+Comment: uart_init used once
+46 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+Hex_0 00003780
+
+Symbol: Hex_0
+   Definitions
+      At line 33 in file library4.s
+   Uses
+      At line 186 in file library4.s
+Comment: Hex_0 used once
+Hex_1 00000300
+
+Symbol: Hex_1
+   Definitions
+      At line 34 in file library4.s
+   Uses
+      At line 190 in file library4.s
+Comment: Hex_1 used once
+Hex_2 00009580
+
+Symbol: Hex_2
+   Definitions
+      At line 35 in file library4.s
+   Uses
+      At line 194 in file library4.s
+Comment: Hex_2 used once
+Hex_3 00008780
+
+Symbol: Hex_3
+   Definitions
+      At line 36 in file library4.s
+   Uses
+      At line 198 in file library4.s
+Comment: Hex_3 used once
+Hex_4 0000A300
+
+Symbol: Hex_4
+   Definitions
+      At line 37 in file library4.s
+   Uses
+      At line 202 in file library4.s
+Comment: Hex_4 used once
+Hex_5 0000A680
+
+Symbol: Hex_5
+   Definitions
+      At line 38 in file library4.s
+   Uses
+      At line 206 in file library4.s
+Comment: Hex_5 used once
+Hex_6 0000B680
+
+Symbol: Hex_6
+   Definitions
+      At line 39 in file library4.s
+   Uses
+      At line 210 in file library4.s
+Comment: Hex_6 used once
+Hex_7 00000380
+
+Symbol: Hex_7
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Absolute symbols
+
+   Definitions
+      At line 40 in file library4.s
+   Uses
+      At line 214 in file library4.s
+Comment: Hex_7 used once
+Hex_8 0000B780
+
+Symbol: Hex_8
+   Definitions
+      At line 41 in file library4.s
+   Uses
+      At line 218 in file library4.s
+Comment: Hex_8 used once
+Hex_9 0000A380
+
+Symbol: Hex_9
+   Definitions
+      At line 42 in file library4.s
+   Uses
+      At line 222 in file library4.s
+Comment: Hex_9 used once
+Hex_a 0000B380
+
+Symbol: Hex_a
+   Definitions
+      At line 43 in file library4.s
+   Uses
+      At line 226 in file library4.s
+Comment: Hex_a used once
+Hex_b 0000B600
+
+Symbol: Hex_b
+   Definitions
+      At line 44 in file library4.s
+   Uses
+      At line 230 in file library4.s
+Comment: Hex_b used once
+Hex_c 00003480
+
+Symbol: Hex_c
+   Definitions
+      At line 45 in file library4.s
+   Uses
+      At line 234 in file library4.s
+Comment: Hex_c used once
+Hex_d 00009700
+
+Symbol: Hex_d
+   Definitions
+      At line 46 in file library4.s
+   Uses
+      At line 238 in file library4.s
+Comment: Hex_d used once
+Hex_e 0000B480
+
+Symbol: Hex_e
+   Definitions
+      At line 47 in file library4.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Absolute symbols
+
+      At line 242 in file library4.s
+Comment: Hex_e used once
+Hex_f 0000B080
+
+Symbol: Hex_f
+   Definitions
+      At line 48 in file library4.s
+   Uses
+      At line 246 in file library4.s
+Comment: Hex_f used once
+Hex_g 00008000
+
+Symbol: Hex_g
+   Definitions
+      At line 32 in file library4.s
+   Uses
+      At line 250 in file library4.s
+Comment: Hex_g used once
+IO0CLR E002800C
+
+Symbol: IO0CLR
+   Definitions
+      At line 27 in file library4.s
+   Uses
+      At line 70 in file library4.s
+      At line 182 in file library4.s
+
+IO0DIR E0028008
+
+Symbol: IO0DIR
+   Definitions
+      At line 25 in file library4.s
+   Uses
+      None
+Comment: IO0DIR unused
+IO0SET E0028000
+
+Symbol: IO0SET
+   Definitions
+      At line 26 in file library4.s
+   Uses
+      At line 71 in file library4.s
+      At line 181 in file library4.s
+
+IO1CLR E002801C
+
+Symbol: IO1CLR
+   Definitions
+      At line 23 in file library4.s
+   Uses
+      At line 269 in file library4.s
+Comment: IO1CLR used once
+IO1DIR E0028018
+
+Symbol: IO1DIR
+   Definitions
+      At line 21 in file library4.s
+   Uses
+      At line 121 in file library4.s
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Absolute symbols
+
+Comment: IO1DIR used once
+IO1PIN E0028010
+
+Symbol: IO1PIN
+   Definitions
+      At line 22 in file library4.s
+   Uses
+      At line 122 in file library4.s
+Comment: IO1PIN used once
+IO1SET E0028014
+
+Symbol: IO1SET
+   Definitions
+      At line 24 in file library4.s
+   Uses
+      None
+Comment: IO1SET unused
+PINSEL0 E002C000
+
+Symbol: PINSEL0
+   Definitions
+      At line 28 in file library4.s
+   Uses
+      None
+Comment: PINSEL0 unused
+RGB_blue 00040000
+
+Symbol: RGB_blue
+   Definitions
+      At line 53 in file library4.s
+   Uses
+      At line 83 in file library4.s
+Comment: RGB_blue used once
+RGB_cyan 00240000
+
+Symbol: RGB_cyan
+   Definitions
+      At line 57 in file library4.s
+   Uses
+      At line 99 in file library4.s
+Comment: RGB_cyan used once
+RGB_green 00200000
+
+Symbol: RGB_green
+   Definitions
+      At line 54 in file library4.s
+   Uses
+      At line 87 in file library4.s
+Comment: RGB_green used once
+RGB_purple 00060000
+
+Symbol: RGB_purple
+   Definitions
+      At line 55 in file library4.s
+   Uses
+      At line 95 in file library4.s
+Comment: RGB_purple used once
+RGB_red 00020000
+
+
+
+
+ARM Macro Assembler    Page 5 Alphabetic symbol ordering
+Absolute symbols
+
+Symbol: RGB_red
+   Definitions
+      At line 52 in file library4.s
+   Uses
+      At line 79 in file library4.s
+Comment: RGB_red used once
+RGB_white 00260000
+
+Symbol: RGB_white
+   Definitions
+      At line 51 in file library4.s
+   Uses
+      At line 72 in file library4.s
+      At line 103 in file library4.s
+
+RGB_yellow 00220000
+
+Symbol: RGB_yellow
+   Definitions
+      At line 56 in file library4.s
+   Uses
+      At line 91 in file library4.s
+Comment: RGB_yellow used once
+Seg 0000B7A0
+
+Symbol: Seg
+   Definitions
+      At line 31 in file library4.s
+   Uses
+      None
+Comment: Seg unused
+THRE 00000020
+
+Symbol: THRE
+   Definitions
+      At line 20 in file library4.s
+   Uses
+      At line 378 in file library4.s
+      At line 379 in file library4.s
+
+U0IER 00000004
+
+Symbol: U0IER
+   Definitions
+      At line 18 in file library4.s
+   Uses
+      At line 340 in file library4.s
+Comment: U0IER used once
+U0LCR 0000000C
+
+Symbol: U0LCR
+   Definitions
+      At line 19 in file library4.s
+   Uses
+      At line 334 in file library4.s
+      At line 343 in file library4.s
+
+U0LSR 00000014
+
+
+
+
+ARM Macro Assembler    Page 6 Alphabetic symbol ordering
+Absolute symbols
+
+Symbol: U0LSR
+   Definitions
+      At line 17 in file library4.s
+   Uses
+      None
+Comment: U0LSR unused
+37 symbols
+417 symbols in table
